@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CelebriPlan — AI-Powered Celebration & Event Planner</title>
+    <meta name="description" content="Plan, organize, customize, book, and manage celebrations from one place. AI-powered event planning with vendor marketplace, smart invitations, 3D venue preview, and budget calculator.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- NAVIGATION BAR -->
+    <!-- ═══════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" id="nav-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-sparkles"></i>
+                </div>
+                <span class="logo-text">Celebri<span class="logo-accent">Plan</span></span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#hero" class="nav-link active" data-section="hero">Home</a></li>
+                <li><a href="#ai-planner" class="nav-link" data-section="ai-planner">AI Planner</a></li>
+                <li><a href="#budget-calculator" class="nav-link" data-section="budget-calculator">Budget</a></li>
+                <li><a href="#vendor-marketplace" class="nav-link" data-section="vendor-marketplace">Vendors</a></li>
+                <li><a href="#invitations" class="nav-link" data-section="invitations">Invitations</a></li>
+                <li><a href="#venue-3d" class="nav-link" data-section="venue-3d">3D Preview</a></li>
+                <li><a href="#guest-management" class="nav-link" data-section="guest-management">Guests</a></li>
+                <li><a href="#dashboard" class="nav-link" data-section="dashboard">Dashboard</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline nav-blueprint-btn" id="nav-blueprint-btn" title="View Full-Stack Startup Architecture & ER Diagram">
+                    <i class="fas fa-sitemap"></i> <span class="nav-btn-text">Startup Blueprint</span>
+                </button>
+                <button class="btn btn-ghost" id="theme-toggle" aria-label="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-primary nav-cta" id="nav-get-started">Get Started</button>
+            </div>
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle Navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- AI CHATBOT WIDGET -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="chatbot-widget" id="chatbot-widget">
+        <button class="chatbot-toggle" id="chatbot-toggle" aria-label="Open AI Chatbot">
+            <i class="fas fa-robot"></i>
+            <span class="chatbot-pulse"></span>
+        </button>
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-avatar"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <h4>CelebriPlan AI</h4>
+                        <span class="chatbot-status">● Online</span>
+                    </div>
+                </div>
+                <button class="chatbot-close" id="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chat-message bot">
+                    <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="chat-bubble">
+                        <p>Hi! 🎉 I'm your AI Event Planning Assistant. Tell me about your celebration — event type, budget, guest count, city — and I'll create a complete plan for you!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-suggestions" id="chatbot-suggestions">
+                <button class="suggestion-chip" data-msg="Plan a birthday party for 50 guests with ₹50,000 budget">🎂 Birthday Party</button>
+                <button class="suggestion-chip" data-msg="Plan a wedding for 200 guests in Delhi with ₹5,00,000 budget">💒 Wedding</button>
+                <button class="suggestion-chip" data-msg="Plan a corporate event for 100 people with ₹2,00,000 budget">🏢 Corporate Event</button>
+                <button class="suggestion-chip" data-msg="Plan a college fest for 500 students with ₹1,00,000 budget">🎓 College Fest</button>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbot-input" placeholder="Describe your event..." autocomplete="off">
+                <button class="chatbot-send" id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- HERO SECTION -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-particles" id="hero-particles"></div>
+            <div class="hero-gradient"></div>
+        </div>
+        <div class="hero-content container">
+            <div class="hero-badge animate-fade-in">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>AI-Powered Event Planning Platform</span>
+            </div>
+            <h1 class="hero-title animate-fade-in-up">
+                Plan <span class="text-gradient">Unforgettable</span><br>
+                Celebrations with AI
+            </h1>
+            <p class="hero-subtitle animate-fade-in-up delay-1">
+                From intimate birthdays to grand weddings — our AI engine handles everything:
+                venues, vendors, budgets, invitations, and real-time event management.
+            </p>
+            <div class="hero-actions animate-fade-in-up delay-2">
+                <a href="#ai-planner" class="btn btn-primary btn-lg">
+                    <i class="fas fa-wand-magic-sparkles"></i> Start Planning
+                </a>
+                <a href="#budget-calculator" class="btn btn-outline btn-lg">
+                    <i class="fas fa-calculator"></i> Calculate Budget
+                </a>
+            </div>
+            <div class="hero-stats animate-fade-in-up delay-3">
+                <div class="stat-item">
+                    <span class="stat-number" data-count="15000">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Events Planned</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-count="500">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Verified Vendors</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-count="98">0</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">Satisfaction Rate</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-count="50">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Cities Covered</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <span>Scroll to explore</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- FEATURES OVERVIEW -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="features-overview" id="features-overview">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-star"></i> Why CelebriPlan</span>
+                <h2 class="section-title">Everything You Need to Plan the <span class="text-gradient">Perfect Event</span></h2>
+                <p class="section-subtitle">One platform to plan, book, manage, and celebrate. Powered by AI, loved by thousands.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card" data-feature="ai">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <h3>AI Event Planner</h3>
+                    <p>Get personalized themes, decoration, food & schedules based on your budget and preferences.</p>
+                </div>
+                <div class="feature-card" data-feature="vendor">
+                    <div class="feature-icon"><i class="fas fa-store"></i></div>
+                    <h3>Vendor Marketplace</h3>
+                    <p>Compare and book banquet halls, decorators, photographers, caterers & DJs in your city.</p>
+                </div>
+                <div class="feature-card" data-feature="invitation">
+                    <div class="feature-icon"><i class="fas fa-envelope-open-text"></i></div>
+                    <h3>Smart Invitations</h3>
+                    <p>AI-generated invitation cards, WhatsApp sharing, QR entry passes & attendance tracking.</p>
+                </div>
+                <div class="feature-card" data-feature="3d">
+                    <div class="feature-icon"><i class="fas fa-cube"></i></div>
+                    <h3>3D Venue Preview</h3>
+                    <p>Preview your event setup, lighting & decoration in interactive 3D before booking.</p>
+                </div>
+                <div class="feature-card" data-feature="budget">
+                    <div class="feature-icon"><i class="fas fa-calculator"></i></div>
+                    <h3>Budget Calculator</h3>
+                    <p>AI-powered budget breakdowns with smart recommendations for every price point.</p>
+                </div>
+                <div class="feature-card" data-feature="guest">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3>Guest Management</h3>
+                    <p>Invitations, RSVP tracking, seating arrangements & QR check-in at the event.</p>
+                </div>
+                <div class="feature-card" data-feature="calendar">
+                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Auto Scheduling</h3>
+                    <p>Tasks and reminders automatically synced with your Google Calendar.</p>
+                </div>
+                <div class="feature-card" data-feature="dashboard">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Live Dashboard</h3>
+                    <p>Real-time task status, vendor updates, budget tracking & expense management.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- AI EVENT PLANNER -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="ai-planner" id="ai-planner">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-brain"></i> AI-Powered</span>
+                <h2 class="section-title">Smart Event <span class="text-gradient">Planner</span></h2>
+                <p class="section-subtitle">Tell us about your event and our AI will generate a complete plan with themes, timeline, budget breakdown & tasks.</p>
+                <div class="planner-mode-tabs">
+                    <button class="planner-tab-btn active" id="tab-btn-form" type="button">
+                        <i class="fas fa-sliders"></i> Interactive Planner
+                    </button>
+                    <button class="planner-tab-btn" id="tab-btn-engine" type="button">
+                        <i class="fas fa-code"></i> 9. AI Engine JSON Playground
+                    </button>
+                </div>
+            </div>
+            <div class="planner-layout">
+                <div class="planner-form-section">
+                    <!-- Tab 1: Interactive Form -->
+                    <div id="planner-form-wrapper">
+                        <form class="planner-form glass-card" id="ai-planner-form">
+                            <div class="form-group">
+                                <label for="event-type"><i class="fas fa-champagne-glasses"></i> Event Type</label>
+                                <div class="select-wrapper">
+                                    <select id="event-type" required>
+                                        <option value="">Select event type</option>
+                                        <option value="birthday">🎂 Birthday Party</option>
+                                        <option value="wedding">💒 Wedding</option>
+                                        <option value="engagement">💍 Engagement</option>
+                                        <option value="anniversary">🥂 Anniversary</option>
+                                        <option value="college-fest">🎓 College Fest</option>
+                                        <option value="corporate">🏢 Corporate Event</option>
+                                        <option value="baby-shower">👶 Baby Shower</option>
+                                        <option value="farewell">🎤 Farewell Party</option>
+                                        <option value="housewarming">🏠 Housewarming</option>
+                                        <option value="festival">🪔 Festival Celebration</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="event-city"><i class="fas fa-location-dot"></i> City</label>
+                                    <input type="text" id="event-city" placeholder="e.g., Jind, Delhi, Mumbai" value="Jind" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="event-guests"><i class="fas fa-users"></i> Number of Guests</label>
+                                    <input type="number" id="event-guests" placeholder="e.g., 50" min="1" max="10000" value="50" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="event-budget"><i class="fas fa-indian-rupee-sign"></i> Total Budget (₹)</label>
+                                    <input type="number" id="event-budget" placeholder="e.g., 50000" min="1000" value="50000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="event-duration"><i class="fas fa-clock"></i> Duration (hours)</label>
+                                    <input type="number" id="event-duration" placeholder="e.g., 4" min="1" max="72" value="4" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-theme"><i class="fas fa-palette"></i> Preferred Theme</label>
+                                <div class="theme-options" id="theme-options">
+                                    <label class="theme-chip"><input type="radio" name="theme" value="modern" checked><span>✨ Modern</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="traditional"><span>🪔 Traditional</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="rustic"><span>🌿 Rustic</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="glamorous"><span>💎 Glamorous</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="minimalist"><span>🤍 Minimalist</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="bohemian"><span>🌸 Bohemian</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="tropical"><span>🌴 Tropical</span></label>
+                                    <label class="theme-chip"><input type="radio" name="theme" value="vintage"><span>📸 Vintage</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-utensils"></i> Food Preference</label>
+                                <div class="food-options">
+                                    <label class="theme-chip"><input type="radio" name="food" value="veg" checked><span>🥗 Vegetarian</span></label>
+                                    <label class="theme-chip"><input type="radio" name="food" value="nonveg"><span>🍗 Non-Vegetarian</span></label>
+                                    <label class="theme-chip"><input type="radio" name="food" value="both"><span>🍽️ Both</span></label>
+                                    <label class="theme-chip"><input type="radio" name="food" value="jain"><span>🙏 Jain</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-notes"><i class="fas fa-note-sticky"></i> Special Requirements</label>
+                                <textarea id="event-notes" placeholder="Any special requirements, preferences, or notes..." rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg btn-full" id="generate-plan-btn">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate AI Plan
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Section 9 AI Planning Engine JSON Playground -->
+                    <div id="planner-engine-wrapper" style="display:none;">
+                        <div class="planner-form glass-card engine-playground-card">
+                            <div class="engine-header">
+                                <div class="engine-badge"><i class="fas fa-terminal"></i> Section 9 Engine Spec</div>
+                                <span class="engine-hint">Structured JSON Input & Output</span>
+                            </div>
+                            <div class="engine-presets">
+                                <span class="presets-label">Presets:</span>
+                                <button type="button" class="preset-btn active" data-preset="jind-birthday">🎂 Jind Birthday (₹50k)</button>
+                                <button type="button" class="preset-btn" data-preset="delhi-wedding">💒 Delhi Wedding (₹5L)</button>
+                                <button type="button" class="preset-btn" data-preset="college-fest">🎓 College Fest (₹1L)</button>
+                                <button type="button" class="preset-btn" data-preset="corporate-event">🏢 Corporate Gala (₹2.5L)</button>
+                            </div>
+                            <div class="form-group">
+                                <div class="editor-header">
+                                    <label for="engine-json-input"><i class="fas fa-arrow-right-to-bracket"></i> Engine Input JSON (budgetPaise):</label>
+                                    <button type="button" class="btn btn-ghost btn-xs" id="format-engine-json"><i class="fas fa-align-left"></i> Format</button>
+                                </div>
+                                <textarea id="engine-json-input" class="code-editor" rows="10" spellcheck="false">{
+  "type": "birthday",
+  "city": "Jind",
+  "guests": 50,
+  "budgetPaise": 5000000,
+  "theme": "modern",
+  "durationHours": 4
+}</textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-lg btn-full" id="run-engine-btn">
+                                <i class="fas fa-bolt"></i> Run AI Planning Engine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planner-result-section" id="planner-result-section" style="display:none;">
+                    <div class="plan-result-wrapper">
+                        <div class="result-view-tabs" id="result-view-tabs">
+                            <button class="result-tab-btn active" id="tab-view-visual"><i class="fas fa-chart-pie"></i> Visual Plan</button>
+                            <button class="result-tab-btn" id="tab-view-json"><i class="fas fa-code"></i> Expected JSON Output</button>
+                        </div>
+                        <div class="plan-result glass-card" id="plan-result">
+                            <!-- AI Plan results will be injected here -->
+                        </div>
+                        <div class="plan-json-result glass-card" id="plan-json-result" style="display:none;">
+                            <div class="json-header">
+                                <span><i class="fas fa-check-circle text-success"></i> Engine Structured Output</span>
+                                <div class="json-actions">
+                                    <button class="btn btn-ghost btn-sm" id="copy-json-btn"><i class="fas fa-copy"></i> Copy JSON</button>
+                                    <button class="btn btn-outline btn-sm" id="download-json-btn"><i class="fas fa-download"></i> Download .json</button>
+                                    <button class="btn btn-primary btn-sm" id="apply-json-plan-btn"><i class="fas fa-gauge-high"></i> Apply to Dashboard</button>
+                                </div>
+                            </div>
+                            <pre class="json-code-block"><code id="raw-json-output"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- AI BUDGET CALCULATOR -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="budget-calculator" id="budget-calculator">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-calculator"></i> AI Budget Engine</span>
+                <h2 class="section-title">Smart <span class="text-gradient">Budget Calculator</span></h2>
+                <p class="section-subtitle">Get detailed budget breakdowns, smart suggestions, and know exactly what's possible within your budget.</p>
+            </div>
+            <div class="budget-layout">
+                <div class="budget-controls glass-card">
+                    <div class="form-group">
+                        <label><i class="fas fa-champagne-glasses"></i> Event Type</label>
+                        <div class="budget-event-types" id="budget-event-types">
+                            <button class="event-type-btn active" data-type="birthday"><i class="fas fa-cake-candles"></i> Birthday</button>
+                            <button class="event-type-btn" data-type="wedding"><i class="fas fa-ring"></i> Wedding</button>
+                            <button class="event-type-btn" data-type="college-fest"><i class="fas fa-graduation-cap"></i> College Fest</button>
+                            <button class="event-type-btn" data-type="corporate"><i class="fas fa-building"></i> Corporate</button>
+                            <button class="event-type-btn" data-type="anniversary"><i class="fas fa-heart"></i> Anniversary</button>
+                            <button class="event-type-btn" data-type="baby-shower"><i class="fas fa-baby"></i> Baby Shower</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Number of Guests: <span class="range-value" id="budget-guest-value">50</span></label>
+                        <input type="range" id="budget-guests" min="10" max="1000" value="50" class="range-slider">
+                        <div class="range-labels"><span>10</span><span>250</span><span>500</span><span>750</span><span>1000</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-indian-rupee-sign"></i> Total Budget: ₹<span class="range-value" id="budget-amount-value">50,000</span></label>
+                        <input type="range" id="budget-amount" min="5000" max="5000000" value="50000" step="1000" class="range-slider">
+                        <div class="range-labels"><span>₹5K</span><span>₹12.5L</span><span>₹25L</span><span>₹37.5L</span><span>₹50L</span></div>
+                    </div>
+                    <button class="btn btn-primary btn-lg btn-full" id="calculate-budget-btn">
+                        <i class="fas fa-calculator"></i> Calculate Budget
+                    </button>
+                </div>
+                <div class="budget-results" id="budget-results">
+                    <div class="budget-chart-card glass-card">
+                        <h3><i class="fas fa-chart-pie"></i> Budget Breakdown</h3>
+                        <div class="budget-chart-container">
+                            <canvas id="budget-chart" width="300" height="300"></canvas>
+                            <div class="budget-total-overlay" id="budget-total-overlay">
+                                <span class="total-label">Total</span>
+                                <span class="total-value" id="budget-total-value">₹50,000</span>
+                            </div>
+                        </div>
+                        <div class="budget-legend" id="budget-legend"></div>
+                    </div>
+                    <div class="budget-suggestions glass-card">
+                        <h3><i class="fas fa-lightbulb"></i> AI Suggestions</h3>
+                        <div class="suggestions-list" id="budget-suggestions-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="budget-breakdown-card glass-card">
+                        <h3><i class="fas fa-list-check"></i> Detailed Breakdown</h3>
+                        <div class="breakdown-items" id="budget-breakdown-items">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- VENDOR MARKETPLACE -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="vendor-marketplace" id="vendor-marketplace">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-store"></i> Marketplace</span>
+                <h2 class="section-title">Find & Book <span class="text-gradient">Top Vendors</span></h2>
+                <p class="section-subtitle">Compare ratings, prices, and portfolios. Book verified vendors for your event in one click.</p>
+            </div>
+            <div class="vendor-filters">
+                <div class="vendor-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="vendor-search" placeholder="Search vendors by name, city, or service...">
+                </div>
+                <div class="vendor-category-filters" id="vendor-category-filters">
+                    <button class="filter-chip active" data-category="all"><i class="fas fa-grid-2"></i> All</button>
+                    <button class="filter-chip" data-category="venue"><i class="fas fa-building-columns"></i> Venues</button>
+                    <button class="filter-chip" data-category="decorator"><i class="fas fa-wand-sparkles"></i> Decorators</button>
+                    <button class="filter-chip" data-category="photographer"><i class="fas fa-camera"></i> Photographers</button>
+                    <button class="filter-chip" data-category="caterer"><i class="fas fa-utensils"></i> Caterers</button>
+                    <button class="filter-chip" data-category="dj"><i class="fas fa-music"></i> DJs & Music</button>
+                    <button class="filter-chip" data-category="planner"><i class="fas fa-clipboard-list"></i> Planners</button>
+                </div>
+                <div class="vendor-compare-action-bar">
+                    <button class="btn btn-outline btn-sm" id="btn-compare-vendors" disabled>
+                        <i class="fas fa-code-compare"></i> Compare Selected (<span id="compare-count-badge">0</span>)
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="btn-clear-vendor-compare" style="display:none;">Clear</button>
+                </div>
+            </div>
+            <div class="vendor-grid" id="vendor-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- VENDOR DETAIL MODAL -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="modal-overlay" id="vendor-modal">
+        <div class="modal-content glass-card">
+            <button class="modal-close" id="vendor-modal-close"><i class="fas fa-times"></i></button>
+            <div id="vendor-modal-body">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SMART INVITATIONS & RSVP -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="invitations" id="invitations">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-envelope-open-text"></i> Smart Invitations</span>
+                <h2 class="section-title">AI-Generated <span class="text-gradient">Invitation Cards</span></h2>
+                <p class="section-subtitle">Create beautiful digital invitations, share via WhatsApp, generate QR entry passes, and track RSVPs in real-time.</p>
+            </div>
+            <div class="invitation-layout">
+                <div class="invitation-creator glass-card">
+                    <h3><i class="fas fa-magic"></i> Create Invitation</h3>
+                    <form id="invitation-form">
+                        <div class="form-group">
+                            <label for="inv-name">Event Name</label>
+                            <input type="text" id="inv-name" placeholder="e.g., Rahul's 25th Birthday">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="inv-date">Date</label>
+                                <input type="date" id="inv-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="inv-time">Time</label>
+                                <input type="time" id="inv-time">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inv-venue">Venue</label>
+                            <input type="text" id="inv-venue" placeholder="e.g., Grand Palace Banquet Hall, Delhi">
+                        </div>
+                        <div class="form-group">
+                            <label for="inv-message">Personal Message</label>
+                            <textarea id="inv-message" rows="3" placeholder="Your heartfelt message to guests..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Invitation Style</label>
+                            <div class="invitation-styles" id="invitation-styles">
+                                <label class="inv-style-option">
+                                    <input type="radio" name="inv-style" value="elegant" checked>
+                                    <div class="inv-style-preview elegant">
+                                        <span>Elegant</span>
+                                    </div>
+                                </label>
+                                <label class="inv-style-option">
+                                    <input type="radio" name="inv-style" value="modern">
+                                    <div class="inv-style-preview modern">
+                                        <span>Modern</span>
+                                    </div>
+                                </label>
+                                <label class="inv-style-option">
+                                    <input type="radio" name="inv-style" value="festive">
+                                    <div class="inv-style-preview festive">
+                                        <span>Festive</span>
+                                    </div>
+                                </label>
+                                <label class="inv-style-option">
+                                    <input type="radio" name="inv-style" value="minimal">
+                                    <div class="inv-style-preview minimal">
+                                        <span>Minimal</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-full">
+                            <i class="fas fa-wand-magic-sparkles"></i> Generate Invitation
+                        </button>
+                    </form>
+                </div>
+                <div class="invitation-preview-section">
+                    <div class="invitation-preview glass-card" id="invitation-preview">
+                        <div class="inv-card elegant" id="inv-card">
+                            <div class="inv-card-inner">
+                                <div class="inv-decoration-top"></div>
+                                <div class="inv-icon"><i class="fas fa-champagne-glasses"></i></div>
+                                <h2 class="inv-title" id="inv-preview-title">You're Invited!</h2>
+                                <p class="inv-event-name" id="inv-preview-event">Event Name</p>
+                                <div class="inv-details">
+                                    <div class="inv-detail"><i class="fas fa-calendar"></i> <span id="inv-preview-date">Select a date</span></div>
+                                    <div class="inv-detail"><i class="fas fa-clock"></i> <span id="inv-preview-time">Select a time</span></div>
+                                    <div class="inv-detail"><i class="fas fa-location-dot"></i> <span id="inv-preview-venue">Enter venue</span></div>
+                                </div>
+                                <p class="inv-message" id="inv-preview-message">Your personal message will appear here...</p>
+                                <div class="inv-qr">
+                                    <canvas id="inv-qr-code" width="120" height="120"></canvas>
+                                    <span>Scan for Entry Pass</span>
+                                </div>
+                                <div class="inv-rsvp-section">
+                                    <p>Will you attend?</p>
+                                    <div class="inv-rsvp-buttons">
+                                        <button class="btn btn-sm btn-accept" id="btn-rsvp-accept"><i class="fas fa-check"></i> Accept</button>
+                                        <button class="btn btn-sm btn-decline" id="btn-rsvp-decline"><i class="fas fa-times"></i> Decline</button>
+                                        <button class="btn btn-sm btn-maybe" id="btn-rsvp-maybe"><i class="fas fa-question"></i> Maybe</button>
+                                    </div>
+                                </div>
+                                <div class="inv-decoration-bottom"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="invitation-actions">
+                        <button class="btn btn-primary" id="share-whatsapp"><i class="fab fa-whatsapp"></i> Share on WhatsApp</button>
+                        <button class="btn btn-outline" id="btn-view-qr-pass"><i class="fas fa-qrcode"></i> QR Entry Pass</button>
+                        <button class="btn btn-outline" id="download-invitation"><i class="fas fa-download"></i> Download Card</button>
+                        <button class="btn btn-outline" id="copy-link"><i class="fas fa-link"></i> Copy Link</button>
+                    </div>
+                    <div class="rsvp-tracker glass-card">
+                        <h3><i class="fas fa-chart-bar"></i> RSVP Tracker</h3>
+                        <div class="rsvp-stats">
+                            <div class="rsvp-stat accepted"><span class="rsvp-count">23</span><span>Accepted</span></div>
+                            <div class="rsvp-stat declined"><span class="rsvp-count">5</span><span>Declined</span></div>
+                            <div class="rsvp-stat pending"><span class="rsvp-count">22</span><span>Pending</span></div>
+                        </div>
+                        <div class="rsvp-progress">
+                            <div class="rsvp-bar accepted" style="width:46%"></div>
+                            <div class="rsvp-bar declined" style="width:10%"></div>
+                            <div class="rsvp-bar pending" style="width:44%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- 3D VENUE PREVIEW -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="venue-3d" id="venue-3d">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-cube"></i> 3D Preview</span>
+                <h2 class="section-title">Interactive <span class="text-gradient">Venue Preview</span></h2>
+                <p class="section-subtitle">Visualize your event setup, lighting, and decoration before booking. Customize every detail in our 3D viewer.</p>
+            </div>
+            <div class="venue-3d-layout">
+                <div class="venue-controls glass-card">
+                    <h3><i class="fas fa-sliders"></i> Customize Venue</h3>
+                    <div class="form-group">
+                        <label>Venue Type</label>
+                        <div class="venue-type-options" id="venue-type-options">
+                            <button class="venue-type-btn active" data-venue="banquet"><i class="fas fa-building-columns"></i> Banquet Hall</button>
+                            <button class="venue-type-btn" data-venue="outdoor"><i class="fas fa-tree"></i> Outdoor Garden</button>
+                            <button class="venue-type-btn" data-venue="rooftop"><i class="fas fa-city"></i> Rooftop</button>
+                            <button class="venue-type-btn" data-venue="beach"><i class="fas fa-umbrella-beach"></i> Beach Venue</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Lighting</label>
+                        <div class="lighting-options">
+                            <button class="lighting-btn active" data-lighting="warm" style="background: linear-gradient(135deg, #ffa726, #ff7043);">Warm</button>
+                            <button class="lighting-btn" data-lighting="cool" style="background: linear-gradient(135deg, #42a5f5, #7e57c2);">Cool</button>
+                            <button class="lighting-btn" data-lighting="neon" style="background: linear-gradient(135deg, #e040fb, #00e5ff);">Neon</button>
+                            <button class="lighting-btn" data-lighting="fairy" style="background: linear-gradient(135deg, #ffd54f, #ffab40);">Fairy</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Table Layout</label>
+                        <div class="layout-options">
+                            <button class="layout-btn active" data-layout="round"><i class="fas fa-circle"></i> Round Tables</button>
+                            <button class="layout-btn" data-layout="long"><i class="fas fa-grip-lines"></i> Long Tables</button>
+                            <button class="layout-btn" data-layout="cocktail"><i class="fas fa-martini-glass"></i> Cocktail</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Decoration Theme</label>
+                        <div class="color-palette">
+                            <button class="color-btn active" data-color="rose" style="background: linear-gradient(135deg, #f48fb1, #ce93d8);"></button>
+                            <button class="color-btn" data-color="gold" style="background: linear-gradient(135deg, #ffd54f, #ff8a65);"></button>
+                            <button class="color-btn" data-color="blue" style="background: linear-gradient(135deg, #64b5f6, #4dd0e1);"></button>
+                            <button class="color-btn" data-color="green" style="background: linear-gradient(135deg, #81c784, #aed581);"></button>
+                            <button class="color-btn" data-color="purple" style="background: linear-gradient(135deg, #b39ddb, #f48fb1);"></button>
+                            <button class="color-btn" data-color="white" style="background: linear-gradient(135deg, #e0e0e0, #f5f5f5);"></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Guest Capacity: <span id="venue-capacity-val">100</span></label>
+                        <input type="range" id="venue-capacity" min="20" max="500" value="100" class="range-slider">
+                    </div>
+                </div>
+                <div class="venue-preview-container glass-card">
+                    <div class="venue-3d-viewer" id="venue-3d-viewer">
+                        <canvas id="venue-canvas" width="800" height="500"></canvas>
+                        <div class="venue-3d-overlay">
+                            <div class="venue-info-badge" id="venue-info-badge">
+                                <span class="venue-name">Banquet Hall</span>
+                                <span class="venue-details">100 guests • Warm lighting • Round tables</span>
+                            </div>
+                        </div>
+                        <div class="venue-3d-controls">
+                            <button class="v3d-btn" id="v3d-rotate"><i class="fas fa-rotate"></i></button>
+                            <button class="v3d-btn" id="v3d-zoom-in"><i class="fas fa-magnifying-glass-plus"></i></button>
+                            <button class="v3d-btn" id="v3d-zoom-out"><i class="fas fa-magnifying-glass-minus"></i></button>
+                            <button class="v3d-btn" id="v3d-fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- GUEST MANAGEMENT -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="guest-management" id="guest-management">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-users"></i> Guest Management</span>
+                <h2 class="section-title">Complete <span class="text-gradient">Guest Management</span></h2>
+                <p class="section-subtitle">Manage invitations, track RSVPs, create seating arrangements, and enable QR check-in at your event.</p>
+            </div>
+            <div class="guest-layout">
+                <div class="guest-controls glass-card">
+                    <div class="guest-header">
+                        <h3><i class="fas fa-user-plus"></i> Add Guests</h3>
+                        <span class="guest-count-badge" id="guest-total-count">0 guests</span>
+                    </div>
+                    <form id="add-guest-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="guest-name" placeholder="Guest name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="tel" id="guest-phone" placeholder="Phone number">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="email" id="guest-email" placeholder="Email (optional)">
+                            </div>
+                            <div class="form-group">
+                                <select id="guest-group">
+                                    <option value="family">👨‍👩‍👦 Family</option>
+                                    <option value="friends">🤝 Friends</option>
+                                    <option value="colleagues">💼 Colleagues</option>
+                                    <option value="vip">⭐ VIP</option>
+                                    <option value="others">👤 Others</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-plus"></i> Add Guest
+                        </button>
+                    </form>
+                    <div class="bulk-actions">
+                        <button class="btn btn-outline btn-sm" id="import-csv"><i class="fas fa-file-csv"></i> Import CSV</button>
+                        <button class="btn btn-outline btn-sm" id="send-all-invites"><i class="fas fa-paper-plane"></i> Send All Invites</button>
+                    </div>
+                </div>
+                <div class="guest-list-section glass-card">
+                    <div class="guest-list-header">
+                        <h3><i class="fas fa-clipboard-list"></i> Guest List</h3>
+                        <div class="guest-filters">
+                            <button class="filter-chip small active" data-filter="all">All</button>
+                            <button class="filter-chip small" data-filter="accepted">✅ Accepted</button>
+                            <button class="filter-chip small" data-filter="pending">⏳ Pending</button>
+                            <button class="filter-chip small" data-filter="declined">❌ Declined</button>
+                        </div>
+                    </div>
+                    <div class="guest-table-wrapper">
+                        <table class="guest-table" id="guest-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Group</th>
+                                    <th>RSVP</th>
+                                    <th>Table</th>
+                                    <th>Check-in</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guest-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="seating-section glass-card">
+                    <h3><i class="fas fa-chair"></i> Seating Arrangement</h3>
+                    <div class="seating-chart" id="seating-chart">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- EXPENSE TRACKER -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="expense-tracker" id="expense-tracker">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-receipt"></i> Expense Tracker</span>
+                <h2 class="section-title">Track Every <span class="text-gradient">Rupee</span></h2>
+                <p class="section-subtitle">Monitor budget, payments, and outstanding vendor dues in real-time.</p>
+            </div>
+            <div class="expense-layout">
+                <div class="expense-summary-cards">
+                    <div class="expense-card glass-card total-budget">
+                        <div class="expense-card-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="expense-card-info">
+                            <span class="expense-label">Total Budget</span>
+                            <span class="expense-value" id="exp-total-budget">₹50,000</span>
+                        </div>
+                    </div>
+                    <div class="expense-card glass-card spent">
+                        <div class="expense-card-icon"><i class="fas fa-credit-card"></i></div>
+                        <div class="expense-card-info">
+                            <span class="expense-label">Spent</span>
+                            <span class="expense-value" id="exp-spent">₹32,500</span>
+                        </div>
+                    </div>
+                    <div class="expense-card glass-card remaining">
+                        <div class="expense-card-icon"><i class="fas fa-piggy-bank"></i></div>
+                        <div class="expense-card-info">
+                            <span class="expense-label">Remaining</span>
+                            <span class="expense-value" id="exp-remaining">₹17,500</span>
+                        </div>
+                    </div>
+                    <div class="expense-card glass-card dues">
+                        <div class="expense-card-icon"><i class="fas fa-clock-rotate-left"></i></div>
+                        <div class="expense-card-info">
+                            <span class="expense-label">Pending Dues</span>
+                            <span class="expense-value" id="exp-dues">₹8,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="expense-details-section">
+                    <div class="expense-add glass-card">
+                        <h3><i class="fas fa-plus-circle"></i> Add Expense</h3>
+                        <form id="add-expense-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="expense-desc" placeholder="Description" required>
+                                </div>
+                                <div class="form-group">
+                                    <select id="expense-category">
+                                        <option value="venue">🏛️ Venue</option>
+                                        <option value="food">🍽️ Food & Catering</option>
+                                        <option value="decoration">🎨 Decoration</option>
+                                        <option value="photography">📸 Photography</option>
+                                        <option value="music">🎵 Music & DJ</option>
+                                        <option value="transport">🚗 Transport</option>
+                                        <option value="other">📦 Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" id="expense-amount" placeholder="Amount (₹)" required>
+                                </div>
+                                <div class="form-group">
+                                    <select id="expense-status">
+                                        <option value="paid">✅ Paid</option>
+                                        <option value="pending">⏳ Pending</option>
+                                        <option value="partial">🔄 Partial</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <i class="fas fa-plus"></i> Add Expense
+                            </button>
+                        </form>
+                    </div>
+                    <div class="expense-list glass-card">
+                        <h3><i class="fas fa-list"></i> Recent Expenses</h3>
+                        <div class="expense-items" id="expense-items">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- LIVE EVENT DASHBOARD -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="dashboard" id="dashboard">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-gauge-high"></i> Live Dashboard</span>
+                <h2 class="section-title">Real-Time Event <span class="text-gradient">Dashboard</span></h2>
+                <p class="section-subtitle">Monitor every aspect of your event with live status updates, task management, and vendor communication.</p>
+            </div>
+            <div class="dashboard-layout">
+                <div class="dashboard-top-row">
+                    <div class="dash-card glass-card countdown-card">
+                        <h3><i class="fas fa-hourglass-half"></i> Event Countdown</h3>
+                        <div class="countdown" id="countdown">
+                            <div class="countdown-item"><span class="cd-value" id="cd-days">15</span><span class="cd-label">Days</span></div>
+                            <div class="countdown-item"><span class="cd-value" id="cd-hours">08</span><span class="cd-label">Hours</span></div>
+                            <div class="countdown-item"><span class="cd-value" id="cd-minutes">42</span><span class="cd-label">Minutes</span></div>
+                            <div class="countdown-item"><span class="cd-value" id="cd-seconds">16</span><span class="cd-label">Seconds</span></div>
+                        </div>
+                    </div>
+                    <div class="dash-card glass-card progress-card">
+                        <h3><i class="fas fa-tasks"></i> Planning Progress</h3>
+                        <div class="progress-ring-container">
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="52" id="progress-ring-fill" />
+                            </svg>
+                            <span class="progress-percent" id="progress-percent">68%</span>
+                        </div>
+                        <div class="progress-stats">
+                            <span><i class="fas fa-check-circle"></i> 17 Done</span>
+                            <span><i class="fas fa-spinner"></i> 5 In Progress</span>
+                            <span><i class="fas fa-circle"></i> 3 Pending</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-main">
+                    <div class="dash-card glass-card tasks-card">
+                        <div class="tasks-header">
+                            <h3><i class="fas fa-list-check"></i> Task Manager</h3>
+                            <div class="tasks-actions">
+                                <button class="btn btn-sm btn-outline" id="sync-all-gcal-btn" title="Sync all tasks with Google Calendar">
+                                    <i class="fab fa-google"></i> Google Calendar
+                                </button>
+                                <button class="btn btn-sm btn-outline" id="export-ics-btn" title="Download .ICS Calendar file">
+                                    <i class="fas fa-calendar-arrow-down"></i> .ICS
+                                </button>
+                                <button class="btn btn-sm btn-primary" id="add-task-btn"><i class="fas fa-plus"></i> Add Task</button>
+                            </div>
+                        </div>
+                        <div class="tasks-list" id="tasks-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="dash-card glass-card timeline-card">
+                        <div class="timeline-card-header">
+                            <h3><i class="fas fa-timeline"></i> Event Timeline</h3>
+                            <button class="btn btn-xs btn-outline" id="sync-timeline-gcal-btn" title="Add Timeline schedule to Google Calendar">
+                                <i class="fab fa-google"></i> Sync Timeline
+                            </button>
+                        </div>
+                        <div class="event-timeline" id="event-timeline">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-bottom">
+                    <div class="dash-card glass-card vendor-status-card">
+                        <h3><i class="fas fa-handshake"></i> Vendor Status</h3>
+                        <div class="vendor-status-list" id="vendor-status-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="dash-card glass-card notifications-card">
+                        <h3><i class="fas fa-bell"></i> Recent Activity</h3>
+                        <div class="notifications-list" id="notifications-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- VENDOR DASHBOARD (for vendors) -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="vendor-dashboard" id="vendor-dashboard">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-store"></i> For Vendors</span>
+                <h2 class="section-title">Vendor <span class="text-gradient">Dashboard</span></h2>
+                <p class="section-subtitle">Manage your services, availability, prices, and bookings all in one place.</p>
+            </div>
+            <div class="vendor-dash-layout">
+                <div class="vd-stats">
+                    <div class="vd-stat-card glass-card">
+                        <i class="fas fa-calendar-check"></i>
+                        <div><span class="vd-stat-value">24</span><span class="vd-stat-label">Total Bookings</span></div>
+                    </div>
+                    <div class="vd-stat-card glass-card">
+                        <i class="fas fa-indian-rupee-sign"></i>
+                        <div><span class="vd-stat-value">₹3.2L</span><span class="vd-stat-label">Revenue</span></div>
+                    </div>
+                    <div class="vd-stat-card glass-card">
+                        <i class="fas fa-star"></i>
+                        <div><span class="vd-stat-value">4.8</span><span class="vd-stat-label">Rating</span></div>
+                    </div>
+                    <div class="vd-stat-card glass-card">
+                        <i class="fas fa-eye"></i>
+                        <div><span class="vd-stat-value">1.2K</span><span class="vd-stat-label">Profile Views</span></div>
+                    </div>
+                </div>
+                <div class="vd-content">
+                    <div class="vd-services glass-card">
+                        <div class="vd-services-header">
+                            <h3><i class="fas fa-concierge-bell"></i> My Services</h3>
+                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Add Service</button>
+                        </div>
+                        <div class="vd-services-list" id="vd-services-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="vd-calendar glass-card">
+                        <h3><i class="fas fa-calendar-alt"></i> Availability Calendar</h3>
+                        <div class="vd-calendar-grid" id="vd-calendar-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="vd-bookings glass-card">
+                        <h3><i class="fas fa-clipboard-list"></i> Upcoming Bookings</h3>
+                        <div class="vd-bookings-list" id="vd-bookings-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- AI THEME GENERATOR -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="theme-generator" id="theme-generator">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-palette"></i> AI Theme Generator</span>
+                <h2 class="section-title">Creative <span class="text-gradient">Theme Concepts</span></h2>
+                <p class="section-subtitle">Get AI-generated decoration concepts based on your preferences. Visualize color palettes, layouts, and decor ideas.</p>
+            </div>
+            <div class="theme-gen-layout">
+                <div class="theme-gen-controls glass-card">
+                    <div class="form-group">
+                        <label>Event Mood</label>
+                        <div class="mood-options" id="mood-options">
+                            <button class="mood-btn active" data-mood="romantic"><i class="fas fa-heart"></i> Romantic</button>
+                            <button class="mood-btn" data-mood="fun"><i class="fas fa-face-laugh"></i> Fun & Playful</button>
+                            <button class="mood-btn" data-mood="elegant"><i class="fas fa-gem"></i> Elegant</button>
+                            <button class="mood-btn" data-mood="festive"><i class="fas fa-drum"></i> Festive</button>
+                            <button class="mood-btn" data-mood="zen"><i class="fas fa-spa"></i> Calm & Zen</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Season</label>
+                        <div class="season-options">
+                            <button class="season-btn active" data-season="spring"><i class="fas fa-seedling"></i> Spring</button>
+                            <button class="season-btn" data-season="summer"><i class="fas fa-sun"></i> Summer</button>
+                            <button class="season-btn" data-season="autumn"><i class="fas fa-leaf"></i> Autumn</button>
+                            <button class="season-btn" data-season="winter"><i class="fas fa-snowflake"></i> Winter</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg btn-full" id="generate-theme-btn">
+                        <i class="fas fa-wand-magic-sparkles"></i> Generate Theme
+                    </button>
+                </div>
+                <div class="theme-gen-results" id="theme-gen-results">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- FOOTER -->
+    <!-- ═══════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="nav-logo">
+                        <div class="logo-icon"><i class="fas fa-sparkles"></i></div>
+                        <span class="logo-text">Celebri<span class="logo-accent">Plan</span></span>
+                    </a>
+                    <p>The AI-powered celebration & event planning platform that makes every occasion unforgettable.</p>
+                    <div class="footer-socials">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <a href="#ai-planner">AI Planner</a>
+                    <a href="#budget-calculator">Budget Calculator</a>
+                    <a href="#vendor-marketplace">Vendors</a>
+                    <a href="#invitations">Invitations</a>
+                    <a href="#venue-3d">3D Preview</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Features</h4>
+                    <a href="#guest-management">Guest Management</a>
+                    <a href="#expense-tracker">Expense Tracker</a>
+                    <a href="#dashboard">Live Dashboard</a>
+                    <a href="#theme-generator">Theme Generator</a>
+                    <a href="#vendor-dashboard">Vendor Portal</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <a href="#">About Us</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 CelebriPlan. All rights reserved. Made with <i class="fas fa-heart" style="color: #f44336;"></i> in India</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Vendor Compare Modal -->
+    <div class="modal-overlay" id="vendor-compare-modal">
+        <div class="modal-content glass-card modal-lg">
+            <button class="modal-close" id="vendor-compare-close"><i class="fas fa-times"></i></button>
+            <div class="modal-header-block">
+                <h3><i class="fas fa-code-compare"></i> Compare Selected Vendors</h3>
+                <p>Side-by-side analysis of pricing, rating, capacity, and included services.</p>
+            </div>
+            <div class="vendor-compare-container" id="vendor-compare-container">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Booking Modal -->
+    <div class="modal-overlay" id="vendor-booking-modal">
+        <div class="modal-content glass-card modal-md">
+            <button class="modal-close" id="vendor-booking-close"><i class="fas fa-times"></i></button>
+            <div class="modal-header-block">
+                <h3 id="booking-modal-title"><i class="fas fa-calendar-check"></i> Book Vendor</h3>
+                <p id="booking-modal-subtitle">Reserve services with instant booking confirmation</p>
+            </div>
+            <form id="vendor-booking-form">
+                <input type="hidden" id="booking-vendor-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Full Name</label>
+                        <input type="text" id="booking-user-name" placeholder="e.g., Tanuj Kumar" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="booking-user-phone" placeholder="e.g., 9876543210" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Date</label>
+                        <input type="date" id="booking-event-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expected Guests</label>
+                        <input type="number" id="booking-guest-count" placeholder="50" min="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Selected Package / Service</label>
+                    <select id="booking-service-select">
+                        <option value="standard">Standard Full-Service Package</option>
+                        <option value="premium">Premium VIP Package (+20%)</option>
+                        <option value="custom">Custom A La Carte</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Special Requests / Instructions</label>
+                    <textarea id="booking-notes" rows="2" placeholder="Dietary instructions, stage dimensions, song preferences..."></textarea>
+                </div>
+                <div class="booking-summary-box">
+                    <div class="summary-line"><span>Estimated Total:</span> <strong id="booking-estimated-price">₹50,000</strong></div>
+                    <div class="summary-line"><small>Advance payment due on confirmation: 20%</small></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-full">
+                    <i class="fas fa-check-circle"></i> Confirm Booking Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Vendor Quote Modal -->
+    <div class="modal-overlay" id="vendor-quote-modal">
+        <div class="modal-content glass-card modal-md">
+            <button class="modal-close" id="vendor-quote-close"><i class="fas fa-times"></i></button>
+            <div class="modal-header-block">
+                <h3 id="quote-modal-title"><i class="fas fa-file-invoice"></i> Request Instant Quote</h3>
+                <p id="quote-modal-subtitle">Get custom itemized pricing directly from vendor</p>
+            </div>
+            <form id="vendor-quote-form">
+                <input type="hidden" id="quote-vendor-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Name</label>
+                        <input type="text" id="quote-name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email / WhatsApp</label>
+                        <input type="text" id="quote-contact" placeholder="Email or 10-digit mobile" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Estimated Budget (₹)</label>
+                        <input type="number" id="quote-budget" placeholder="e.g., 40000">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Type</label>
+                        <select id="quote-event-type">
+                            <option value="birthday">Birthday Party</option>
+                            <option value="wedding">Wedding</option>
+                            <option value="corporate">Corporate Event</option>
+                            <option value="fest">College Fest</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Required Services & Notes</label>
+                    <textarea id="quote-requirements" rows="3" placeholder="Describe the specific services you need..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-full">
+                    <i class="fas fa-paper-plane"></i> Request Custom Quotation
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interactive RSVP Response Modal -->
+    <div class="modal-overlay" id="rsvp-modal">
+        <div class="modal-content glass-card modal-sm">
+            <button class="modal-close" id="rsvp-modal-close"><i class="fas fa-times"></i></button>
+            <div class="modal-header-block text-center">
+                <div class="rsvp-header-icon" id="rsvp-modal-icon"><i class="fas fa-envelope-open-text"></i></div>
+                <h3 id="rsvp-modal-title">RSVP for Celebration</h3>
+                <p id="rsvp-modal-subtitle">Let the host know you will attend!</p>
+            </div>
+            <form id="interactive-rsvp-form">
+                <input type="hidden" id="rsvp-status-input" value="accepted">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="rsvp-guest-name" placeholder="e.g., Vikram Sharma" required>
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp / Mobile Number</label>
+                    <input type="tel" id="rsvp-guest-phone" placeholder="e.g., 9876543210" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Total Attendees</label>
+                        <input type="number" id="rsvp-guest-count" value="1" min="1" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Food Choice</label>
+                        <select id="rsvp-meal-preference">
+                            <option value="veg">🥗 Vegetarian</option>
+                            <option value="nonveg">🍗 Non-Vegetarian</option>
+                            <option value="jain">🙏 Jain</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-full" id="submit-rsvp-btn">
+                    <i class="fas fa-check"></i> Submit RSVP & Get QR Pass
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Digital QR Entry Pass Modal -->
+    <div class="modal-overlay" id="qr-pass-modal">
+        <div class="modal-content glass-card modal-sm text-center">
+            <button class="modal-close" id="qr-pass-modal-close"><i class="fas fa-times"></i></button>
+            <div class="entry-pass-card" id="printable-entry-pass">
+                <div class="pass-brand">
+                    <i class="fas fa-sparkles"></i> CelebriPlan Digital Entry Pass
+                </div>
+                <div class="pass-event-title" id="pass-event-title">Modern Birthday Celebration</div>
+                <div class="pass-guest-name" id="pass-guest-name">Rahul Sharma</div>
+                <div class="pass-badge" id="pass-status-badge">✓ VIP Confirmed</div>
+                <div class="pass-qr-wrapper">
+                    <canvas id="pass-qr-canvas" width="160" height="160"></canvas>
+                    <div class="pass-code" id="pass-code-text">PASS-#CP-89241</div>
+                </div>
+                <div class="pass-details-grid">
+                    <div><span>Date:</span> <strong id="pass-date-text">Nov 15, 2026</strong></div>
+                    <div><span>Time:</span> <strong id="pass-time-text">06:00 PM</strong></div>
+                    <div><span>Venue:</span> <strong id="pass-venue-text">Grand Banquet Hall</strong></div>
+                    <div><span>Table:</span> <strong id="pass-table-text">Table #1</strong></div>
+                </div>
+            </div>
+            <div class="pass-actions">
+                <button class="btn btn-primary" id="btn-print-pass"><i class="fas fa-print"></i> Print Pass</button>
+                <button class="btn btn-outline" id="btn-share-pass-wa"><i class="fab fa-whatsapp"></i> Share Pass</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-Stack Startup Architecture & ER Diagram Modal -->
+    <div class="modal-overlay" id="blueprint-modal">
+        <div class="modal-content glass-card modal-xl">
+            <button class="modal-close" id="blueprint-modal-close"><i class="fas fa-times"></i></button>
+            <div class="blueprint-modal-header">
+                <span class="section-badge"><i class="fas fa-rocket"></i> Startup Architecture Blueprint</span>
+                <h2>Celebration & Event Planner — Full-Stack Blueprint</h2>
+                <p>Next.js 14 App Router + Node.js Engine + PostgreSQL Prisma ORM + AI Planning + Vendor Marketplace + 3D View</p>
+            </div>
+            <div class="blueprint-tabs">
+                <button class="bp-tab active" data-bptab="er-diagram"><i class="fas fa-sitemap"></i> Entity Relationship Diagram</button>
+                <button class="bp-tab" data-bptab="tech-stack"><i class="fas fa-layer-group"></i> Tech Stack Architecture</button>
+                <button class="bp-tab" data-bptab="prisma-schema"><i class="fas fa-database"></i> Prisma ORM Schema</button>
+                <button class="bp-tab" data-bptab="api-docs"><i class="fas fa-network-wired"></i> REST & AI API Endpoints</button>
+            </div>
+            <div class="blueprint-content-area">
+                <!-- Tab 1: ER Diagram -->
+                <div class="bp-tab-panel active" id="panel-er-diagram">
+                    <div class="er-diagram-viewer">
+                        <div class="er-diagram-legend">
+                            <span class="legend-chip user-chip">● Core User & Roles</span>
+                            <span class="legend-chip event-chip">● Event & Planning</span>
+                            <span class="legend-chip guest-chip">● Guests & Invitations</span>
+                            <span class="legend-chip vendor-chip">● Vendors, Bookings & Payments</span>
+                        </div>
+                        <div class="er-diagram-grid">
+                            <!-- User Entity -->
+                            <div class="er-node user-node">
+                                <div class="node-header"><i class="fas fa-user"></i> USER</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field"><span>email</span><small>String</small></div>
+                                    <div class="field"><span>name</span><small>String</small></div>
+                                    <div class="field"><span>phone</span><small>String</small></div>
+                                    <div class="field"><span>role</span><small>UserRole</small></div>
+                                </div>
+                                <div class="node-relations">has Role • organizes Event • owns Vendor</div>
+                            </div>
+
+                            <!-- User Role -->
+                            <div class="er-node role-node">
+                                <div class="node-header"><i class="fas fa-id-badge"></i> USER_ROLE</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field"><span>roleName</span><small>ORGANIZER | VENDOR | GUEST | ADMIN</small></div>
+                                    <div class="field"><span>permissions</span><small>String[]</small></div>
+                                </div>
+                                <div class="node-relations">belongs to User</div>
+                            </div>
+
+                            <!-- Event Entity -->
+                            <div class="er-node event-node">
+                                <div class="node-header"><i class="fas fa-calendar-star"></i> EVENT</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>👤 userId</span><small>UUID</small></div>
+                                    <div class="field"><span>type</span><small>EventType</small></div>
+                                    <div class="field"><span>city</span><small>String</small></div>
+                                    <div class="field"><span>budgetPaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>guestCount</span><small>Int</small></div>
+                                    <div class="field"><span>theme</span><small>String</small></div>
+                                </div>
+                                <div class="node-relations">sends Invitation • has Tasks • manages Budget • requests Services</div>
+                            </div>
+
+                            <!-- Invitation Entity -->
+                            <div class="er-node inv-node">
+                                <div class="node-header"><i class="fas fa-envelope-open-text"></i> INVITATION</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field"><span>qrCode</span><small>String</small></div>
+                                    <div class="field"><span>template</span><small>String</small></div>
+                                    <div class="field"><span>shareLink</span><small>String</small></div>
+                                </div>
+                                <div class="node-relations">informs Guest</div>
+                            </div>
+
+                            <!-- Guest Entity -->
+                            <div class="er-node guest-node">
+                                <div class="node-header"><i class="fas fa-user-check"></i> GUEST</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>✉️ invitationId</span><small>UUID</small></div>
+                                    <div class="field"><span>name</span><small>String</small></div>
+                                    <div class="field"><span>rsvpStatus</span><small>ACCEPTED | DECLINED | PENDING</small></div>
+                                    <div class="field"><span>tableNumber</span><small>Int?</small></div>
+                                    <div class="field"><span>checkedIn</span><small>Boolean</small></div>
+                                </div>
+                                <div class="node-relations">receives Invitation • check-in at Event</div>
+                            </div>
+
+                            <!-- Task Entity -->
+                            <div class="er-node task-node">
+                                <div class="node-header"><i class="fas fa-list-check"></i> TASK_LIST</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field"><span>title</span><small>String</small></div>
+                                    <div class="field"><span>priority</span><small>HIGH | MEDIUM | LOW</small></div>
+                                    <div class="field"><span>completed</span><small>Boolean</small></div>
+                                    <div class="field"><span>gcalEventId</span><small>String?</small></div>
+                                </div>
+                                <div class="node-relations">belongs to Event • syncs with Google Calendar</div>
+                            </div>
+
+                            <!-- Budget / Expense Entity -->
+                            <div class="er-node budget-node">
+                                <div class="node-header"><i class="fas fa-wallet"></i> BUDGET / EXPENSE</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field"><span>category</span><small>VENUE | FOOD | DECOR | PHOTO | OTHER</small></div>
+                                    <div class="field"><span>allocatedPaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>spentPaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>dueStatus</span><small>PAID | PENDING | PARTIAL</small></div>
+                                </div>
+                                <div class="node-relations">tracks Event Financials</div>
+                            </div>
+
+                            <!-- Album Entity -->
+                            <div class="er-node album-node">
+                                <div class="node-header"><i class="fas fa-images"></i> ALBUM</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field"><span>mediaUrls</span><small>String[]</small></div>
+                                    <div class="field"><span>photographerId</span><small>UUID?</small></div>
+                                </div>
+                                <div class="node-relations">stores Event Memories</div>
+                            </div>
+
+                            <!-- Event Checklist Entity -->
+                            <div class="er-node check-node">
+                                <div class="node-header"><i class="fas fa-calendar-check"></i> EVENT_CHECKLIST</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field"><span>scheduleTimeline</span><small>JSON</small></div>
+                                    <div class="field"><span>status</span><small>ACTIVE | COMPLETED</small></div>
+                                </div>
+                                <div class="node-relations">organizes Day-of Schedule</div>
+                            </div>
+
+                            <!-- Vendor Entity -->
+                            <div class="er-node vendor-node">
+                                <div class="node-header"><i class="fas fa-store"></i> VENDOR</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>👤 ownerId</span><small>UUID</small></div>
+                                    <div class="field"><span>businessName</span><small>String</small></div>
+                                    <div class="field"><span>category</span><small>VENUE | CATERER | DECORATOR | DJ | PHOTO</small></div>
+                                    <div class="field"><span>city</span><small>String</small></div>
+                                    <div class="field"><span>rating</span><small>Float</small></div>
+                                </div>
+                                <div class="node-relations">offers Services • receives Requests • manages Bookings</div>
+                            </div>
+
+                            <!-- Service Entity -->
+                            <div class="er-node service-node">
+                                <div class="node-header"><i class="fas fa-concierge-bell"></i> SERVICE</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🏪 vendorId</span><small>UUID</small></div>
+                                    <div class="field"><span>title</span><small>String</small></div>
+                                    <div class="field"><span>basePricePaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>capacity</span><small>Int</small></div>
+                                </div>
+                                <div class="node-relations">belongs to Vendor</div>
+                            </div>
+
+                            <!-- Service Request -->
+                            <div class="er-node request-node">
+                                <div class="node-header"><i class="fas fa-file-invoice"></i> SERVICE_REQUEST</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🏪 vendorId</span><small>UUID</small></div>
+                                    <div class="field"><span>requirements</span><small>String</small></div>
+                                    <div class="field"><span>dateRequested</span><small>DateTime</small></div>
+                                </div>
+                                <div class="node-relations">produces Quote</div>
+                            </div>
+
+                            <!-- Quote Entity -->
+                            <div class="er-node quote-node">
+                                <div class="node-header"><i class="fas fa-file-lines"></i> QUOTE</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>📄 requestId</span><small>UUID</small></div>
+                                    <div class="field"><span>quotedPricePaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>terms</span><small>String</small></div>
+                                    <div class="field"><span>accepted</span><small>Boolean</small></div>
+                                </div>
+                                <div class="node-relations">confirms Booking</div>
+                            </div>
+
+                            <!-- Booking Entity -->
+                            <div class="er-node booking-node">
+                                <div class="node-header"><i class="fas fa-handshake"></i> BOOKING</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>📑 quoteId</span><small>UUID</small></div>
+                                    <div class="field"><span>status</span><small>CONFIRMED | CANCELLED</small></div>
+                                    <div class="field"><span>scheduledDate</span><small>DateTime</small></div>
+                                </div>
+                                <div class="node-relations">generates Payment • receives Review</div>
+                            </div>
+
+                            <!-- Payment Entity -->
+                            <div class="er-node payment-node">
+                                <div class="node-header"><i class="fas fa-credit-card"></i> PAYMENT</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🤝 bookingId</span><small>UUID</small></div>
+                                    <div class="field"><span>amountPaise</span><small>BigInt</small></div>
+                                    <div class="field"><span>gatewayRef</span><small>String</small></div>
+                                    <div class="field"><span>status</span><small>SUCCESS | PENDING</small></div>
+                                </div>
+                                <div class="node-relations">settles Booking</div>
+                            </div>
+
+                            <!-- Review Entity -->
+                            <div class="er-node review-node">
+                                <div class="node-header"><i class="fas fa-star"></i> REVIEW</div>
+                                <div class="node-fields">
+                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
+                                    <div class="field fk"><span>🤝 bookingId</span><small>UUID</small></div>
+                                    <div class="field"><span>rating</span><small>1 to 5</small></div>
+                                    <div class="field"><span>comment</span><small>String</small></div>
+                                </div>
+                                <div class="node-relations">rates Vendor Service</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Tech Stack -->
+                <div class="bp-tab-panel" id="panel-tech-stack" style="display:none;">
+                    <div class="tech-stack-overview">
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fab fa-react text-info"></i></div>
+                            <h4>Next.js 14 App Router</h4>
+                            <p>Server-side rendering, React Server Components, responsive Tailwind / styled UI, and SEO-optimized event landing pages.</p>
+                        </div>
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fab fa-node-js text-success"></i></div>
+                            <h4>Node.js / Express API</h4>
+                            <p>Event orchestration engine, payment webhooks, Google Calendar OAuth2 integration, and WhatsApp Cloud API messaging.</p>
+                        </div>
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fas fa-robot text-primary"></i></div>
+                            <h4>AI Planning Engine (Section 9)</h4>
+                            <p>Structured JSON planner generating exact per-category budget splits, step-by-step task lists, and timed schedules.</p>
+                        </div>
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fas fa-cube text-warning"></i></div>
+                            <h4>Three.js / HTML5 3D Preview</h4>
+                            <p>Interactive 3D venue setup viewer with dynamic stage lighting, custom table configurations, and floor plan customization.</p>
+                        </div>
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fas fa-database text-info"></i></div>
+                            <h4>PostgreSQL + Prisma ORM</h4>
+                            <p>ACID-compliant relational database modeling Users, Events, Vendors, Quotes, Bookings, Payments, and Guest RSVPs.</p>
+                        </div>
+                        <div class="stack-card">
+                            <div class="stack-icon"><i class="fas fa-bolt text-danger"></i></div>
+                            <h4>Socket.io / Redis</h4>
+                            <p>Real-time live organizer dashboard, instant RSVP tracking, QR check-in notifications, and vendor messaging.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Prisma Schema -->
+                <div class="bp-tab-panel" id="panel-prisma-schema" style="display:none;">
+                    <div class="schema-code-wrapper">
+                        <div class="schema-header">
+                            <span>prisma/schema.prisma (Production PostgreSQL Schema)</span>
+                            <button class="btn btn-ghost btn-xs" id="copy-prisma-btn"><i class="fas fa-copy"></i> Copy Schema</button>
+                        </div>
+                        <pre class="schema-code"><code>// Prisma Schema for CelebriPlan Event Platform
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ORGANIZER
+  VENDOR
+  GUEST
+  ADMIN
+}
+
+enum RSVPStatus {
+  ACCEPTED
+  DECLINED
+  PENDING
+}
+
+enum BookingStatus {
+  REQUESTED
+  QUOTED
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  phone     String?
+  role      Role      @default(ORGANIZER)
+  events    Event[]   @relation("OrganizerEvents")
+  vendor    Vendor?   @relation("VendorOwner")
+  createdAt DateTime  @default(now())
+}
+
+model Event {
+  id           String        @id @default(uuid())
+  title        String
+  type         String        // birthday, wedding, college-fest, corporate
+  city         String
+  budgetPaise  BigInt
+  guestCount   Int
+  theme        String
+  durationHour Int           @default(4)
+  organizerId  String
+  organizer    User          @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  invitation   Invitation?
+  tasks        Task[]
+  expenses     Expense[]
+  bookings     Booking[]
+  createdAt    DateTime      @default(now())
+}
+
+model Invitation {
+  id        String   @id @default(uuid())
+  eventId   String   @unique
+  event     Event    @relation(fields: [eventId], references: [id])
+  qrCodeUrl String
+  template  String   @default("elegant")
+  guests    Guest[]
+}
+
+model Guest {
+  id           String     @id @default(uuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id])
+  name         String
+  phone        String?
+  email        String?
+  rsvpStatus   RSVPStatus @default(PENDING)
+  tableNumber  Int?
+  checkedIn    Boolean    @default(false)
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  title       String
+  priority    String   @default("medium")
+  completed   Boolean  @default(false)
+  dueDate     DateTime?
+  gcalEventId String?
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  category    String   // venue, food, decoration, photography, other
+  description String
+  amountPaise BigInt
+  status      String   @default("paid")
+}
+
+model Vendor {
+  id          String     @id @default(uuid())
+  ownerId     String     @unique
+  owner       User       @relation("VendorOwner", fields: [ownerId], references: [id])
+  name        String
+  category    String     // venue, decorator, photographer, caterer, dj
+  city        String
+  rating      Float      @default(5.0)
+  services    Service[]
+  bookings    Booking[]
+}
+
+model Service {
+  id             String  @id @default(uuid())
+  vendorId       String
+  vendor         Vendor  @relation(fields: [vendorId], references: [id])
+  name           String
+  basePricePaise BigInt
+  capacity       Int?
+}
+
+model Booking {
+  id          String        @id @default(uuid())
+  eventId     String
+  event       Event         @relation(fields: [eventId], references: [id])
+  vendorId    String
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  status      BookingStatus @default(CONFIRMED)
+  totalPaise  BigInt
+  advancePaid BigInt        @default(0)
+  createdAt   DateTime      @default(now())
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Tab 4: API Docs -->
+                <div class="bp-tab-panel" id="panel-api-docs" style="display:none;">
+                    <div class="api-docs-list">
+                        <div class="api-doc-item">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/api/ai/plan</span>
+                            <p>Executes Section 9 AI Event Planning Engine. Accepts <code>{ type, city, guests, budgetPaise, theme, durationHours }</code> and returns clean structured output with title, budget breakdown, tasks & timeline.</p>
+                        </div>
+                        <div class="api-doc-item">
+                            <span class="api-method get">GET</span>
+                            <span class="api-path">/api/vendors?category=&city=</span>
+                            <p>Returns verified marketplace vendors filtered by category (venue, caterer, decorator, photographer, dj) and city.</p>
+                        </div>
+                        <div class="api-doc-item">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/api/vendors/compare</span>
+                            <p>Side-by-side comparative analysis of selected vendor IDs across capacity, pricing, ratings, and inclusions.</p>
+                        </div>
+                        <div class="api-doc-item">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/api/guests/rsvp</span>
+                            <p>Records guest RSVP status, generates unique QR entry pass code, and updates real-time attendance tracking.</p>
+                        </div>
+                        <div class="api-doc-item">
+                            <span class="api-method get">GET</span>
+                            <span class="api-path">/api/calendar/export</span>
+                            <p>Generates compliant iCalendar (.ICS) file containing all event milestones and synchronized tasks for Google Calendar & Apple Calendar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal-content glass-card modal-sm">
+            <button class="modal-close" id="task-modal-close"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-plus-circle"></i> Add New Task</h3>
+            <form id="add-task-form">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="task-title" placeholder="e.g., Confirm venue booking" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="task-priority">
+                            <option value="high">🔴 High</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="low">🟢 Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date" id="task-due">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Assign To</label>
+                    <input type="text" id="task-assignee" placeholder="e.g., Event Coordinator">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-plus"></i> Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

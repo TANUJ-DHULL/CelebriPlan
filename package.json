@@ -1,0 +1,20 @@
+{
+  "name": "celebriplan-startup",
+  "version": "1.0.0",
+  "description": "CelebriPlan — Full-Stack AI Celebration & Event Planner Platform (Next.js + Node.js + AI + Vendor Marketplace + 3D View)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ai-event-planner",
+    "vendor-marketplace",
+    "smart-invitations",
+    "3d-venue",
+    "budget-calculator",
+    "startup-blueprint"
+  ],
+  "author": "CelebriPlan Founders",
+  "license": "MIT"
+}
