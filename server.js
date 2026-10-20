@@ -206,8 +206,8 @@ const MIME_TYPES = {
     '.ico': 'image/x-icon'
 };
 
-// ─── HTTP Server ───
-const server = http.createServer(async (req, res) => {
+// ─── HTTP Server & Request Handler ───
+async function handleRequest(req, res) {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -219,7 +219,7 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    const parsedUrl = url.parse(req.url, true);
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
 
     // ── API: Section 9 AI Event Planning Engine ──
@@ -238,8 +238,8 @@ const server = http.createServer(async (req, res) => {
 
     // ── API: Vendor Marketplace List & Filter ──
     if (req.method === 'GET' && pathname === '/api/vendors') {
-        const category = parsedUrl.query.category;
-        const city = parsedUrl.query.city;
+        const category = parsedUrl.searchParams.get('category');
+        const city = parsedUrl.searchParams.get('city');
         let result = vendorsDB;
 
         if (category && category !== 'all') {
@@ -347,14 +347,20 @@ const server = http.createServer(async (req, res) => {
         const stream = fs.createReadStream(filePath);
         stream.pipe(res);
     });
-});
+}
 
-server.listen(PORT, () => {
-    console.log(`\n========================================================`);
-    console.log(`  🎉 CelebriPlan Server is active!`);
-    console.log(`  🌐 Frontend: http://localhost:${PORT}`);
-    console.log(`  🤖 AI Planning Engine: POST http://localhost:${PORT}/api/ai/plan`);
-    console.log(`  🏪 Vendor Marketplace: GET http://localhost:${PORT}/api/vendors`);
-    console.log(`  📅 Calendar Sync .ICS: GET http://localhost:${PORT}/api/calendar/export`);
-    console.log(`========================================================\n`);
-});
+// Start standalone server when executed directly
+if (require.main === module) {
+    const server = http.createServer(handleRequest);
+    server.listen(PORT, () => {
+        console.log(`\n========================================================`);
+        console.log(`  🎉 CelebriPlan Server is active!`);
+        console.log(`  🌐 Frontend: http://localhost:${PORT}`);
+        console.log(`  🤖 AI Planning Engine: POST http://localhost:${PORT}/api/ai/plan`);
+        console.log(`  🏪 Vendor Marketplace: GET http://localhost:${PORT}/api/vendors`);
+        console.log(`  📅 Calendar Sync .ICS: GET http://localhost:${PORT}/api/calendar/export`);
+        console.log(`========================================================\n`);
+    });
+}
+
+module.exports = handleRequest;
