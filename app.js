@@ -19,6 +19,7 @@ const AppState = {
 // ─── Initialization ───
 document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
+    initPageRouter();
     initHeroParticles();
     initCounters();
     initAIPlannerForm();
@@ -46,42 +47,159 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════
-// NAVIGATION
+// MULTI-PAGE ROUTER & NAVIGATION
 // ═══════════════════════════════════════════
+function navigateToPage(pageName) {
+    if (!pageName || pageName === '#' || pageName === '') pageName = 'home';
+    pageName = pageName.replace(/^#\/?/, '').replace(/\/$/, '');
+
+    const validPages = [
+        'home', 'ai-planner', 'budget-calculator', 'vendor-marketplace',
+        'invitations', 'venue-3d', 'guest-management', 'expense-tracker',
+        'dashboard', 'vendor-dashboard', 'theme-generator'
+    ];
+
+    if (!validPages.includes(pageName)) {
+        pageName = 'home';
+    }
+
+    // 1. Toggle visibility of app pages
+    document.querySelectorAll('.app-page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    const targetPage = document.getElementById(`page-${pageName}`);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    }
+
+    // 2. Update active status on navbar items
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.page === pageName) {
+            link.classList.add('active');
+        }
+    });
+
+    // 3. Update browser history/URL hash cleanly
+    const targetHash = pageName === 'home' ? '' : `#/${pageName}`;
+    if (window.location.hash !== targetHash) {
+        window.history.pushState(null, '', targetHash || window.location.pathname);
+    }
+
+    // 4. Scroll smoothly to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 5. Special canvas re-renders when page becomes visible
+    if (pageName === 'budget-calculator') {
+        setTimeout(calculateBudget, 50);
+    } else if (pageName === 'venue-3d') {
+        setTimeout(() => {
+            if (typeof window.redrawVenue3D === 'function') {
+                window.redrawVenue3D();
+            }
+        }, 50);
+    } else if (pageName === 'invitations') {
+        setTimeout(generateQRCode, 50);
+    }
+}
+
+function initPageRouter() {
+    // Read initial URL hash
+    const initialHash = window.location.hash;
+    if (initialHash && initialHash !== '#') {
+        navigateToPage(initialHash);
+    } else {
+        navigateToPage('home');
+    }
+
+    // Listen to browser Back / Forward buttons
+    window.addEventListener('hashchange', () => {
+        navigateToPage(window.location.hash);
+    });
+
+    const validPages = [
+        'home', 'ai-planner', 'budget-calculator', 'vendor-marketplace',
+        'invitations', 'venue-3d', 'guest-management', 'expense-tracker',
+        'dashboard', 'vendor-dashboard', 'theme-generator'
+    ];
+
+    // Universal click delegate for all page navigations (buttons, data-page, footer & hero anchors)
+    document.addEventListener('click', (e) => {
+        // 1. Element with data-page attribute
+        const targetBtn = e.target.closest('[data-page]');
+        if (targetBtn && !targetBtn.classList.contains('nav-link')) {
+            const page = targetBtn.dataset.page;
+            if (page) {
+                e.preventDefault();
+                navigateToPage(page);
+                return;
+            }
+        }
+
+        // 2. Logo click
+        const logo = e.target.closest('.nav-logo, #nav-logo');
+        if (logo) {
+            e.preventDefault();
+            navigateToPage('home');
+            return;
+        }
+
+        // 3. Anchor links (e.g. footer links, hero CTAs, navbar hrefs)
+        const anchor = e.target.closest('a[href]');
+        if (anchor) {
+            const href = anchor.getAttribute('href');
+            if (href) {
+                const cleanHref = href.replace(/^#\/?/, '').replace(/\/$/, '');
+                if (validPages.includes(cleanHref)) {
+                    e.preventDefault();
+                    navigateToPage(cleanHref);
+                    return;
+                }
+            }
+        }
+    });
+}
+
 function initNavbar() {
     const navbar = document.getElementById('navbar');
     const hamburger = document.getElementById('nav-hamburger');
     const navLinks = document.getElementById('nav-links');
 
-    // Scroll effect
+    // Scroll shadow effect
     window.addEventListener('scroll', () => {
-        navbar.classList.toggle('scrolled', window.scrollY > 50);
+        if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
+    });
 
-        // Active link update
-        const sections = document.querySelectorAll('section[id]');
-        sections.forEach(section => {
-            const rect = section.getBoundingClientRect();
-            if (rect.top <= 150 && rect.bottom >= 150) {
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                const link = document.querySelector(`.nav-link[data-section="${section.id}"]`);
-                if (link) link.classList.add('active');
-            }
+    // Hamburger toggle for mobile
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
         });
-    });
 
-    // Hamburger toggle
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navLinks.classList.toggle('active');
-    });
-
-    // Close nav on link click (mobile)
-    navLinks.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navLinks.classList.remove('active');
+        // Close nav on link click
+        navLinks.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                const page = link.dataset.page;
+                if (page) {
+                    navigateToPage(page);
+                }
+            });
         });
-    });
+    }
+
+    const navLogo = document.getElementById('nav-logo');
+    if (navLogo) {
+        navLogo.addEventListener('click', () => navigateToPage('home'));
+    }
+
+    const navGetStarted = document.getElementById('nav-get-started');
+    if (navGetStarted) {
+        navGetStarted.addEventListener('click', () => navigateToPage('ai-planner'));
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -1522,8 +1640,9 @@ function init3DVenuePreview() {
         }
     }
 
-    // Initial draw
+    // Initial draw & expose for multi-page switcher
     draw();
+    window.redrawVenue3D = draw;
 
     // Auto-rotate
     function animate() {
@@ -2174,47 +2293,47 @@ function getThemeConcepts(mood, season) {
             ],
             autumn: [
                 { name: '🥂 Black Tie Affair', description: 'Sophisticated black and gold with tall centerpieces and dramatic lighting.', gradient: 'linear-gradient(135deg, #212121, #424242)', icon: 'fa-crown', colors: ['#212121', '#ffd700', '#ffffff', '#757575', '#e0e0e0'], elements: ['Tall Gold Centerpieces', 'Black Linen', 'Spotlights', 'Grand Entrance'] },
-                { name: '🍾 Champagne Toast', description: 'Champagne and blush tones with delicate florals and refined elegance.', gradient: 'linear-gradient(135deg, #d7ccc8, '#efebe9)', icon: 'fa-champagne-glasses', colors: ['#d7ccc8', '#f48fb1', '#ffd700', '#ffffff', '#bcaaa4'], elements: ['Champagne Tower', 'Blush Roses', 'Gold Cutlery', 'Silk Napkins'] },
+                { name: '🍾 Champagne Toast', description: 'Champagne and blush tones with delicate florals and refined elegance.', gradient: 'linear-gradient(135deg, #d7ccc8, #efebe9)', icon: 'fa-champagne-glasses', colors: ['#d7ccc8', '#f48fb1', '#ffd700', '#ffffff', '#bcaaa4'], elements: ['Champagne Tower', 'Blush Roses', 'Gold Cutlery', 'Silk Napkins'] },
             ],
             winter: [
                 { name: '🏰 Royal Palace', description: 'Grand royal theme with rich velvets, crown motifs, and palace-worthy décor.', gradient: 'linear-gradient(135deg, #4a148c, #6a1b9a)', icon: 'fa-crown', colors: ['#4a148c', '#ffd700', '#ffffff', '#e1bee7', '#311b92'], elements: ['Royal Thrones', 'Velvet Draping', 'Crown Centerpieces', 'Grand Chandelier'] },
-                { name: '✨ Starlight Gala', description: 'Celestial theme with twinkling stars, deep navy, and silver accents.', gradient: 'linear-gradient(135deg, #0d1b2a, '#1b2838)', icon: 'fa-star', colors: ['#0d1b2a', '#c0c0c0', '#ffd700', '#90caf9', '#1a237e'], elements: ['Star Ceiling', 'Silver Draping', 'Crescent Arches', 'Galaxy Projections'] },
+                { name: '✨ Starlight Gala', description: 'Celestial theme with twinkling stars, deep navy, and silver accents.', gradient: 'linear-gradient(135deg, #0d1b2a, #1b2838)', icon: 'fa-star', colors: ['#0d1b2a', '#c0c0c0', '#ffd700', '#90caf9', '#1a237e'], elements: ['Star Ceiling', 'Silver Draping', 'Crescent Arches', 'Galaxy Projections'] },
             ]
         },
         festive: {
             spring: [
                 { name: '🪔 Holi Celebration', description: 'Vibrant colors, powder play zones, and Bollywood-style entertainment.', gradient: 'linear-gradient(135deg, #e91e63, #ff9800)', icon: 'fa-palette', colors: ['#e91e63', '#ff9800', '#4caf50', '#2196f3', '#ffeb3b'], elements: ['Color Play Zone', 'Flower Showers', 'Dhol Players', 'Gulal Balloons'] },
-                { name: '🌺 Spring Festival', description: 'Flower-filled celebration with garlands, rangoli, and traditional music.', gradient: 'linear-gradient(135deg, #ff6f00, '#e65100)', icon: 'fa-drum', colors: ['#ff6f00', '#f44336', '#ffeb3b', '#4caf50', '#ffffff'], elements: ['Marigold Garlands', 'Rangoli Design', 'Traditional Music', 'Dance Stage'] },
+                { name: '🌺 Spring Festival', description: 'Flower-filled celebration with garlands, rangoli, and traditional music.', gradient: 'linear-gradient(135deg, #ff6f00, #e65100)', icon: 'fa-drum', colors: ['#ff6f00', '#f44336', '#ffeb3b', '#4caf50', '#ffffff'], elements: ['Marigold Garlands', 'Rangoli Design', 'Traditional Music', 'Dance Stage'] },
             ],
             summer: [
-                { name: '🥁 Dhol Night', description: 'High-energy dhol beats, LED dance floor, and energetic Bollywood vibes.', gradient: 'linear-gradient(135deg, #f44336, '#d32f2f)', icon: 'fa-drum', colors: ['#f44336', '#ffd700', '#ff9800', '#ffffff', '#4caf50'], elements: ['Dhol Players', 'LED Dance Floor', 'Bollywood Photo Booth', 'Neon Signs'] },
-                { name: '🎵 Music Festival', description: 'Concert-style setup with stage, sound, lights, and festival vibes.', gradient: 'linear-gradient(135deg, #6200ea, '#304ffe)', icon: 'fa-music', colors: ['#6200ea', '#00e5ff', '#ff1744', '#ffea00', '#ffffff'], elements: ['Concert Stage', 'Light Show', 'VIP Lounge', 'Food Trucks'] },
+                { name: '🥁 Dhol Night', description: 'High-energy dhol beats, LED dance floor, and energetic Bollywood vibes.', gradient: 'linear-gradient(135deg, #f44336, #d32f2f)', icon: 'fa-drum', colors: ['#f44336', '#ffd700', '#ff9800', '#ffffff', '#4caf50'], elements: ['Dhol Players', 'LED Dance Floor', 'Bollywood Photo Booth', 'Neon Signs'] },
+                { name: '🎵 Music Festival', description: 'Concert-style setup with stage, sound, lights, and festival vibes.', gradient: 'linear-gradient(135deg, #6200ea, #304ffe)', icon: 'fa-music', colors: ['#6200ea', '#00e5ff', '#ff1744', '#ffea00', '#ffffff'], elements: ['Concert Stage', 'Light Show', 'VIP Lounge', 'Food Trucks'] },
             ],
             autumn: [
-                { name: '🪔 Diwali Spectacular', description: 'Grand Diwali celebration with diyas, lanterns, rangoli, and fireworks.', gradient: 'linear-gradient(135deg, #ff6f00, '#bf360c)', icon: 'fa-fire', colors: ['#ff6f00', '#ffd700', '#d32f2f', '#ffffff', '#4e342e'], elements: ['1000 Diyas', 'Lantern Walkways', 'Grand Rangoli', 'Firecracker Display'] },
-                { name: '🎊 Navratri Garba', description: 'Traditional garba night with dandiya, chaniya choli, and vibrant décor.', gradient: 'linear-gradient(135deg, '#e91e63', '#c2185b)', icon: 'fa-music', colors: ['#e91e63', '#4caf50', '#ffeb3b', '#ff9800', '#ffffff'], elements: ['Garba Ground', 'Dandiya Sticks', 'Traditional Décor', 'Spinning Lights'] },
+                { name: '🪔 Diwali Spectacular', description: 'Grand Diwali celebration with diyas, lanterns, rangoli, and fireworks.', gradient: 'linear-gradient(135deg, #ff6f00, #bf360c)', icon: 'fa-fire', colors: ['#ff6f00', '#ffd700', '#d32f2f', '#ffffff', '#4e342e'], elements: ['1000 Diyas', 'Lantern Walkways', 'Grand Rangoli', 'Firecracker Display'] },
+                { name: '🎊 Navratri Garba', description: 'Traditional garba night with dandiya, chaniya choli, and vibrant décor.', gradient: 'linear-gradient(135deg, #e91e63, #c2185b)', icon: 'fa-music', colors: ['#e91e63', '#4caf50', '#ffeb3b', '#ff9800', '#ffffff'], elements: ['Garba Ground', 'Dandiya Sticks', 'Traditional Décor', 'Spinning Lights'] },
             ],
             winter: [
-                { name: '🎊 Grand Celebration', description: 'Majestic winter celebration with warm lights, traditional décor, and feast.', gradient: 'linear-gradient(135deg, #b71c1c, '#880e4f)', icon: 'fa-champagne-glasses', colors: ['#b71c1c', '#ffd700', '#ffffff', '#4a148c', '#00695c'], elements: ['Grand Entrance Gate', 'Traditional Torans', 'Brass Décor', 'Live Music Stage'] },
-                { name: '🎇 Lohri Celebration', description: 'Bonfire, folk music, and traditional Punjabi celebration vibes.', gradient: 'linear-gradient(135deg, '#ff5722', '#e64a19'), icon: 'fa-fire', colors: ['#ff5722', '#ffeb3b', '#795548', '#ffffff', '#ff9800'], elements: ['Bonfire Setup', 'Folk Music', 'Dhol', 'Traditional Food Stalls'] },
+                { name: '🎊 Grand Celebration', description: 'Majestic winter celebration with warm lights, traditional décor, and feast.', gradient: 'linear-gradient(135deg, #b71c1c, #880e4f)', icon: 'fa-champagne-glasses', colors: ['#b71c1c', '#ffd700', '#ffffff', '#4a148c', '#00695c'], elements: ['Grand Entrance Gate', 'Traditional Torans', 'Brass Décor', 'Live Music Stage'] },
+                { name: '🎇 Lohri Celebration', description: 'Bonfire, folk music, and traditional Punjabi celebration vibes.', gradient: 'linear-gradient(135deg, #ff5722, #e64a19)', icon: 'fa-fire', colors: ['#ff5722', '#ffeb3b', '#795548', '#ffffff', '#ff9800'], elements: ['Bonfire Setup', 'Folk Music', 'Dhol', 'Traditional Food Stalls'] },
             ]
         },
         zen: {
             spring: [
                 { name: '🧘 Zen Garden', description: 'Minimalist Japanese-inspired with bamboo, stones, and water features.', gradient: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)', icon: 'fa-spa', colors: ['#81c784', '#a1887f', '#ffffff', '#90a4ae', '#e8f5e9'], elements: ['Bamboo Screens', 'Stone Garden', 'Water Fountain', 'Bonsai Trees'] },
-                { name: '🌸 Sakura Serenity', description: 'Japanese cherry blossom inspired with soft pink, white, and natural elements.', gradient: 'linear-gradient(135deg, #fce4ec, '#f8bbd0)', icon: 'fa-spa', colors: ['#f48fb1', '#ffffff', '#e8f5e9', '#bcaaa4', '#fce4ec'], elements: ['Sakura Branches', 'Paper Lanterns', 'Tatami Seating', 'Zen Stones'] },
+                { name: '🌸 Sakura Serenity', description: 'Japanese cherry blossom inspired with soft pink, white, and natural elements.', gradient: 'linear-gradient(135deg, #fce4ec, #f8bbd0)', icon: 'fa-spa', colors: ['#f48fb1', '#ffffff', '#e8f5e9', '#bcaaa4', '#fce4ec'], elements: ['Sakura Branches', 'Paper Lanterns', 'Tatami Seating', 'Zen Stones'] },
             ],
             summer: [
-                { name: '🌿 Forest Retreat', description: 'Deep greens, natural wood, and ambient sounds for a peaceful escape.', gradient: 'linear-gradient(135deg, '#1b5e20', '#2e7d32'), icon: 'fa-tree', colors: ['#1b5e20', '#4caf50', '#795548', '#ffffff', '#a5d6a7'], elements: ['Natural Greenery', 'Wood Elements', 'Ambient Sounds', 'Candle Paths'] },
-                { name: '💧 Water Elements', description: 'Flowing water features, lotus ponds, and reflective surfaces.', gradient: 'linear-gradient(135deg, '#0277bd', '#01579b'), icon: 'fa-water', colors: ['#0277bd', '#ffffff', '#e1f5fe', '#81d4fa', '#b3e5fc'], elements: ['Water Curtain', 'Lotus Arrangements', 'Mirror Pool', 'Floating Candles'] },
+                { name: '🌿 Forest Retreat', description: 'Deep greens, natural wood, and ambient sounds for a peaceful escape.', gradient: 'linear-gradient(135deg, #1b5e20, #2e7d32)', icon: 'fa-tree', colors: ['#1b5e20', '#4caf50', '#795548', '#ffffff', '#a5d6a7'], elements: ['Natural Greenery', 'Wood Elements', 'Ambient Sounds', 'Candle Paths'] },
+                { name: '💧 Water Elements', description: 'Flowing water features, lotus ponds, and reflective surfaces.', gradient: 'linear-gradient(135deg, #0277bd, #01579b)', icon: 'fa-water', colors: ['#0277bd', '#ffffff', '#e1f5fe', '#81d4fa', '#b3e5fc'], elements: ['Water Curtain', 'Lotus Arrangements', 'Mirror Pool', 'Floating Candles'] },
             ],
             autumn: [
-                { name: '🍵 Tea Ceremony', description: 'Warm earth tones, ceramic accents, and intimate gathering setup.', gradient: 'linear-gradient(135deg, '#5d4037', '#4e342e'), icon: 'fa-mug-hot', colors: ['#5d4037', '#d7ccc8', '#ffffff', '#a1887f', '#efebe9'], elements: ['Tea Station', 'Ceramic Décor', 'Earth Tone Linens', 'Meditation Corner'] },
-                { name: '🌾 Harvest Calm', description: 'Natural grains, dried flowers, and warm ambient earth-tone celebration.', gradient: 'linear-gradient(135deg, '#bf360c', '#e65100'), icon: 'fa-wheat-awn', colors: ['#bf360c', '#d7ccc8', '#ffcc80', '#ffffff', '#8d6e63'], elements: ['Wheat Bundles', 'Dried Flower Arches', 'Linen Draping', 'Warm Candle Clusters'] },
+                { name: '🍵 Tea Ceremony', description: 'Warm earth tones, ceramic accents, and intimate gathering setup.', gradient: 'linear-gradient(135deg, #5d4037, #4e342e)', icon: 'fa-mug-hot', colors: ['#5d4037', '#d7ccc8', '#ffffff', '#a1887f', '#efebe9'], elements: ['Tea Station', 'Ceramic Décor', 'Earth Tone Linens', 'Meditation Corner'] },
+                { name: '🌾 Harvest Calm', description: 'Natural grains, dried flowers, and warm ambient earth-tone celebration.', gradient: 'linear-gradient(135deg, #bf360c, #e65100)', icon: 'fa-wheat-awn', colors: ['#bf360c', '#d7ccc8', '#ffcc80', '#ffffff', '#8d6e63'], elements: ['Wheat Bundles', 'Dried Flower Arches', 'Linen Draping', 'Warm Candle Clusters'] },
             ],
             winter: [
-                { name: '🕯️ Candlelit Peace', description: 'Hundreds of candles, warm blankets, and peaceful winter ambiance.', gradient: 'linear-gradient(135deg, '#3e2723', '#4e342e'), icon: 'fa-fire', colors: ['#3e2723', '#ffab40', '#ffffff', '#d7ccc8', '#5d4037'], elements: ['Candle Clusters', 'Warm Blankets', 'Soft Music', 'Aromatherapy'] },
-                { name: '🏔️ Mountain Lodge', description: 'Cozy mountain lodge feeling with wood, stone, and warm lighting.', gradient: 'linear-gradient(135deg, '#455a64', '#37474f'), icon: 'fa-mountain', colors: ['#455a64', '#8d6e63', '#ffffff', '#ffab40', '#37474f'], elements: ['Log Furniture', 'Stone Accents', 'Plaid Textiles', 'Warm String Lights'] },
+                { name: '🕯️ Candlelit Peace', description: 'Hundreds of candles, warm blankets, and peaceful winter ambiance.', gradient: 'linear-gradient(135deg, #3e2723, #4e342e)', icon: 'fa-fire', colors: ['#3e2723', '#ffab40', '#ffffff', '#d7ccc8', '#5d4037'], elements: ['Candle Clusters', 'Warm Blankets', 'Soft Music', 'Aromatherapy'] },
+                { name: '🏔️ Mountain Lodge', description: 'Cozy mountain lodge feeling with wood, stone, and warm lighting.', gradient: 'linear-gradient(135deg, #455a64, #37474f)', icon: 'fa-mountain', colors: ['#455a64', '#8d6e63', '#ffffff', '#ffab40', '#37474f'], elements: ['Log Furniture', 'Stone Accents', 'Plaid Textiles', 'Warm String Lights'] },
             ]
         }
     };
@@ -2398,32 +2517,27 @@ function initThemeToggle() {
 // SMOOTH SCROLL & ANIMATIONS
 // ═══════════════════════════════════════════
 function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
+    // Only smooth-scroll to anchors that are within the current active page
+    document.querySelectorAll('a[href^="#"]:not([href="#"]):not([href^="#/"])').forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.querySelector(link.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
+            const href = link.getAttribute('href');
+            if (href && href.length > 1) {
+                const target = document.querySelector(href);
+                if (target && target.closest('.app-page.active')) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         });
     });
 }
 
 function initScrollAnimations() {
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.feature-card, .glass-card, .vendor-card, .expense-card, .vd-stat-card, .theme-concept-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
+    // Keep all cards fully visible and interactive at all times
+    document.querySelectorAll('.feature-card, .glass-card, .vendor-card, .expense-card, .vd-stat-card, .theme-concept-card, .cat-module-card').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        el.style.visibility = 'visible';
     });
 }
 

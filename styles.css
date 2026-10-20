@@ -4015,3 +4015,224 @@ section {
     }
 }
 
+/* ═══════════════════════════════════════════
+   MULTI-PAGE APPLICATION ARCHITECTURE
+   ═══════════════════════════════════════════ */
+.app-page {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.app-page.active {
+    display: block;
+    opacity: 1;
+    animation: fadeInPage 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Breadcrumb Navigation Bar ─── */
+.page-breadcrumb-bar {
+    background: rgba(17, 17, 39, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.85rem 0;
+    position: sticky;
+    top: 70px;
+    z-index: var(--z-sticky);
+}
+
+.breadcrumb-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(124, 58, 237, 0.1);
+    border-color: var(--primary);
+    color: var(--primary-light);
+}
+
+.btn-back-home:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.breadcrumb-trail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.breadcrumb-home {
+    color: var(--primary-light);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb-home:hover {
+    color: white;
+}
+
+.breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.breadcrumb-quick-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.quick-nav-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-right: 0.25rem;
+}
+
+.quick-nav-pill {
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.quick-nav-pill:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: var(--text-primary);
+    border-color: var(--primary-light);
+}
+
+/* ─── Categories Hub on Frontpage ─── */
+.categories-showcase {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-primary);
+}
+
+.category-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.cat-module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+.cat-module-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary-light);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.25);
+}
+
+.cat-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.cat-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.cat-badge-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.cat-module-card h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.cat-module-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.cat-feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+}
+
+.cat-feature-pills span {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--primary-light);
+    font-weight: 500;
+}
+
+.cat-action-btn {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+/* Ensure all cards are visible and active across all views */
+.glass-card, .feature-card, .vendor-card, .expense-card, .vd-stat-card, .theme-concept-card {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+

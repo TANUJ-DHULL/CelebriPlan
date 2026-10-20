@@ -17,21 +17,22 @@
     <!-- ═══════════════════════════════════════════ -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo" id="nav-logo">
+            <a href="javascript:void(0)" class="nav-logo" id="nav-logo" onclick="navigateToPage('home')">
                 <div class="logo-icon">
                     <i class="fas fa-sparkles"></i>
                 </div>
                 <span class="logo-text">Celebri<span class="logo-accent">Plan</span></span>
             </a>
             <ul class="nav-links" id="nav-links">
-                <li><a href="#hero" class="nav-link active" data-section="hero">Home</a></li>
-                <li><a href="#ai-planner" class="nav-link" data-section="ai-planner">AI Planner</a></li>
-                <li><a href="#budget-calculator" class="nav-link" data-section="budget-calculator">Budget</a></li>
-                <li><a href="#vendor-marketplace" class="nav-link" data-section="vendor-marketplace">Vendors</a></li>
-                <li><a href="#invitations" class="nav-link" data-section="invitations">Invitations</a></li>
-                <li><a href="#venue-3d" class="nav-link" data-section="venue-3d">3D Preview</a></li>
-                <li><a href="#guest-management" class="nav-link" data-section="guest-management">Guests</a></li>
-                <li><a href="#dashboard" class="nav-link" data-section="dashboard">Dashboard</a></li>
+                <li><a href="javascript:void(0)" class="nav-link active" data-page="home" onclick="navigateToPage('home')">Home</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="ai-planner" onclick="navigateToPage('ai-planner')">AI Planner</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="budget-calculator" onclick="navigateToPage('budget-calculator')">Budget</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="vendor-marketplace" onclick="navigateToPage('vendor-marketplace')">Vendors</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="invitations" onclick="navigateToPage('invitations')">Invitations</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="venue-3d" onclick="navigateToPage('venue-3d')">3D Preview</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="guest-management" onclick="navigateToPage('guest-management')">Guests</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="expense-tracker" onclick="navigateToPage('expense-tracker')">Expenses</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-page="dashboard" onclick="navigateToPage('dashboard')">Dashboard</a></li>
             </ul>
             <div class="nav-actions">
                 <button class="btn btn-outline nav-blueprint-btn" id="nav-blueprint-btn" title="View Full-Stack Startup Architecture & ER Diagram">
@@ -40,7 +41,7 @@
                 <button class="btn btn-ghost" id="theme-toggle" aria-label="Toggle Theme">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button class="btn btn-primary nav-cta" id="nav-get-started">Get Started</button>
+                <button class="btn btn-primary nav-cta" id="nav-get-started" onclick="navigateToPage('ai-planner')">Start Planning</button>
             </div>
             <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle Navigation">
                 <span></span><span></span><span></span>
@@ -91,7 +92,9 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- HERO SECTION -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="hero" id="hero">
+    <!-- ══════ PAGE 1: HOME FRONTPAGE ══════ -->
+    <main class="app-page active" id="page-home">
+        <section class="hero" id="hero">
         <div class="hero-bg">
             <div class="hero-particles" id="hero-particles"></div>
             <div class="hero-gradient"></div>
@@ -110,12 +113,12 @@
                 venues, vendors, budgets, invitations, and real-time event management.
             </p>
             <div class="hero-actions animate-fade-in-up delay-2">
-                <a href="#ai-planner" class="btn btn-primary btn-lg">
+                <button class="btn btn-primary btn-lg" onclick="navigateToPage('ai-planner')">
                     <i class="fas fa-wand-magic-sparkles"></i> Start Planning
-                </a>
-                <a href="#budget-calculator" class="btn btn-outline btn-lg">
+                </button>
+                <button class="btn btn-outline btn-lg" onclick="navigateToPage('budget-calculator')">
                     <i class="fas fa-calculator"></i> Calculate Budget
-                </a>
+                </button>
             </div>
             <div class="hero-stats animate-fade-in-up delay-3">
                 <div class="stat-item">
@@ -146,11 +149,202 @@
             <span>Scroll to explore</span>
         </div>
     </section>
+        
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- CATEGORIES & MODULES SHOWCASE HUB -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="categories-showcase" id="categories-hub">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="section-badge"><i class="fas fa-layer-group"></i> Dedicated Planning Pages</span>
+                <h2 class="section-title">Explore All Event <span class="text-gradient">Categories & Pages</span></h2>
+                <p class="section-subtitle">Each category is a dedicated planning suite. Click any card below to launch its full-page studio.</p>
+            </div>
+            <div class="category-cards-grid">
+                <!-- 1. AI Event Planner -->
+                <div class="cat-module-card" onclick="navigateToPage('ai-planner')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"><i class="fas fa-brain"></i></div>
+                        <span class="cat-badge-pill">Section 9 Engine</span>
+                    </div>
+                    <h3>AI Event Planner</h3>
+                    <p>Generate complete event blueprints with per-category budgets, timed activity schedules, decoration concepts, and food menus.</p>
+                    <div class="cat-feature-pills">
+                        <span>🎂 Birthdays</span>
+                        <span>💒 Weddings</span>
+                        <span>🎓 College Fests</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('ai-planner')">
+                        Open AI Planner <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
 
-    <!-- ═══════════════════════════════════════════ -->
-    <!-- FEATURES OVERVIEW -->
-    <!-- ═══════════════════════════════════════════ -->
-    <section class="features-overview" id="features-overview">
+                <!-- 2. AI Budget Calculator -->
+                <div class="cat-module-card" onclick="navigateToPage('budget-calculator')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #059669, #10b981);"><i class="fas fa-calculator"></i></div>
+                        <span class="cat-badge-pill">Smart Costing</span>
+                    </div>
+                    <h3>AI Budget Calculator</h3>
+                    <p>Interactive sliders for guests (10-1000) and budget (₹5K-₹50L). View dynamic donut charts and smart tips on what you can afford.</p>
+                    <div class="cat-feature-pills">
+                        <span>📊 Donut Chart</span>
+                        <span>💰 Per-person Cost</span>
+                        <span>💡 Cost Tips</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('budget-calculator')">
+                        Calculate Budget <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 3. Vendor Marketplace -->
+                <div class="cat-module-card" onclick="navigateToPage('vendor-marketplace')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #2563eb, #3b82f6);"><i class="fas fa-store"></i></div>
+                        <span class="cat-badge-pill">Compare & Book</span>
+                    </div>
+                    <h3>Vendor Marketplace</h3>
+                    <p>Compare ratings, pricing, and services across banquet halls, decorators, photographers, caterers, and DJs. Book with 1 click.</p>
+                    <div class="cat-feature-pills">
+                        <span>⚖️ Side-by-Side Compare</span>
+                        <span>⭐ Verified Reviews</span>
+                        <span>📑 Instant Quotes</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('vendor-marketplace')">
+                        Browse Vendors <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 4. Smart Invitations & RSVP -->
+                <div class="cat-module-card" onclick="navigateToPage('invitations')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #db2777, #f43f5e);"><i class="fas fa-envelope-open-text"></i></div>
+                        <span class="cat-badge-pill">WhatsApp & QR</span>
+                    </div>
+                    <h3>Smart Invitations & RSVP</h3>
+                    <p>Create AI invitation cards in 4 themes, broadcast on WhatsApp, collect interactive RSVPs, and generate scannable QR passes.</p>
+                    <div class="cat-feature-pills">
+                        <span>💌 4 Card Styles</span>
+                        <span>📲 WhatsApp Share</span>
+                        <span>🎫 QR Entry Passes</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('invitations')">
+                        Create Invitations <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 5. 3D Venue Preview -->
+                <div class="cat-module-card" onclick="navigateToPage('venue-3d')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #d97706, #f59e0b);"><i class="fas fa-cube"></i></div>
+                        <span class="cat-badge-pill">3D Studio</span>
+                    </div>
+                    <h3>3D Venue Preview</h3>
+                    <p>Interactive 3D venue setup studio. Customize banquet hall, outdoor garden, rooftop, or beach with lighting, tables & stage colors.</p>
+                    <div class="cat-feature-pills">
+                        <span>✨ 4 Lighting Modes</span>
+                        <span>🪑 3 Table Layouts</span>
+                        <span>🎨 Decor Palettes</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('venue-3d')">
+                        Launch 3D Viewer <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 6. Guest Management -->
+                <div class="cat-module-card" onclick="navigateToPage('guest-management')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #0d9488, #14b8a6);"><i class="fas fa-users"></i></div>
+                        <span class="cat-badge-pill">Check-in Ready</span>
+                    </div>
+                    <h3>Guest Management</h3>
+                    <p>Track accepted, declined, and pending RSVPs. Visual circular table seating arrangements and on-site QR code check-in.</p>
+                    <div class="cat-feature-pills">
+                        <span>👥 Guest Table</span>
+                        <span>🪑 Seating Chart</span>
+                        <span>✅ QR Check-in</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('guest-management')">
+                        Manage Guests <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 7. Expense Tracker -->
+                <div class="cat-module-card" onclick="navigateToPage('expense-tracker')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #4f46e5, #6366f1);"><i class="fas fa-receipt"></i></div>
+                        <span class="cat-badge-pill">Budget Control</span>
+                    </div>
+                    <h3>Expense Tracker</h3>
+                    <p>Track every rupee in real-time. Monitor total budget, spent funds, remaining amounts, and outstanding vendor payment dues.</p>
+                    <div class="cat-feature-pills">
+                        <span>💳 Paid / Pending</span>
+                        <span>📊 Dues Monitor</span>
+                        <span>➕ Add Expenses</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('expense-tracker')">
+                        Track Expenses <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 8. Live Event Dashboard -->
+                <div class="cat-module-card" onclick="navigateToPage('dashboard')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #e11d48, #f43f5e);"><i class="fas fa-gauge-high"></i></div>
+                        <span class="cat-badge-pill">GCal Sync</span>
+                    </div>
+                    <h3>Live Event Dashboard</h3>
+                    <p>The organizer command room: live countdown clock, planning progress ring, vendor statuses, and 1-click Google Calendar sync.</p>
+                    <div class="cat-feature-pills">
+                        <span>📅 Google Calendar</span>
+                        <span>⏳ Countdown</span>
+                        <span>⏱️ Timeline</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('dashboard')">
+                        Open Dashboard <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 9. Vendor Dashboard -->
+                <div class="cat-module-card" onclick="navigateToPage('vendor-dashboard')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #7c2d12, #c2410c);"><i class="fas fa-shop"></i></div>
+                        <span class="cat-badge-pill">Supplier Portal</span>
+                    </div>
+                    <h3>Vendor Dashboard</h3>
+                    <p>Dedicated portal for service providers and banquet managers to manage packages, view booking requests, and set calendar dates.</p>
+                    <div class="cat-feature-pills">
+                        <span>📅 Availability Cal</span>
+                        <span>💼 My Services</span>
+                        <span>💵 Revenue Stats</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('vendor-dashboard')">
+                        Vendor Portal <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 10. AI Theme Generator -->
+                <div class="cat-module-card" onclick="navigateToPage('theme-generator')">
+                    <div class="cat-card-top">
+                        <div class="cat-icon-box" style="background: linear-gradient(135deg, #9333ea, #c084fc);"><i class="fas fa-palette"></i></div>
+                        <span class="cat-badge-pill">Creative Concepts</span>
+                    </div>
+                    <h3>AI Theme Generator</h3>
+                    <p>Input event mood and season to generate creative color palettes, decor elements, stage aesthetics, and lighting configurations.</p>
+                    <div class="cat-feature-pills">
+                        <span>🎨 Color Palettes</span>
+                        <span>🌸 Seasonal Themes</span>
+                        <span>✨ Stage Designs</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm btn-full cat-action-btn" onclick="event.stopPropagation(); navigateToPage('theme-generator')">
+                        Generate Themes <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <section class="features-overview" id="features-overview">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-star"></i> Why CelebriPlan</span>
@@ -201,11 +395,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- AI EVENT PLANNER -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="ai-planner" id="ai-planner">
+    <!-- ══════ PAGE 2: AI EVENT PLANNER ══════ -->
+    <main class="app-page" id="page-ai-planner">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">AI Event Planner & Section 9 Engine</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button><button class="quick-nav-pill" onclick="navigateToPage('venue-3d')">3D Preview</button>
+            </div>
+        </div>
+    </div>
+        <section class="ai-planner" id="ai-planner">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-brain"></i> AI-Powered</span>
@@ -355,11 +570,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- AI BUDGET CALCULATOR -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="budget-calculator" id="budget-calculator">
+    <!-- ══════ PAGE 3: AI BUDGET CALCULATOR ══════ -->
+    <main class="app-page" id="page-budget-calculator">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Smart AI Budget Calculator</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button><button class="quick-nav-pill" onclick="navigateToPage('venue-3d')">3D Preview</button>
+            </div>
+        </div>
+    </div>
+        <section class="budget-calculator" id="budget-calculator">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-calculator"></i> AI Budget Engine</span>
@@ -421,11 +657,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- VENDOR MARKETPLACE -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="vendor-marketplace" id="vendor-marketplace">
+    <!-- ══════ PAGE 4: VENDOR MARKETPLACE ══════ -->
+    <main class="app-page" id="page-vendor-marketplace">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Vendor Marketplace & Comparison</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button><button class="quick-nav-pill" onclick="navigateToPage('venue-3d')">3D Preview</button>
+            </div>
+        </div>
+    </div>
+        <section class="vendor-marketplace" id="vendor-marketplace">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-store"></i> Marketplace</span>
@@ -458,6 +715,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- VENDOR DETAIL MODAL -->
@@ -474,7 +732,27 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- SMART INVITATIONS & RSVP -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="invitations" id="invitations">
+    <!-- ══════ PAGE 5: SMART INVITATIONS & RSVP ══════ -->
+    <main class="app-page" id="page-invitations">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Smart Invitations & RSVP Tracker</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('venue-3d')">3D Preview</button>
+            </div>
+        </div>
+    </div>
+        <section class="invitations" id="invitations">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-envelope-open-text"></i> Smart Invitations</span>
@@ -594,11 +872,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- 3D VENUE PREVIEW -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="venue-3d" id="venue-3d">
+    <!-- ══════ PAGE 6: 3D VENUE PREVIEW ══════ -->
+    <main class="app-page" id="page-venue-3d">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Interactive 3D Venue Preview</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="venue-3d" id="venue-3d">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-cube"></i> 3D Preview</span>
@@ -670,11 +969,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- GUEST MANAGEMENT -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="guest-management" id="guest-management">
+    <!-- ══════ PAGE 7: GUEST MANAGEMENT ══════ -->
+    <main class="app-page" id="page-guest-management">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Guest Management & Seating Chart</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="guest-management" id="guest-management">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-users"></i> Guest Management</span>
@@ -756,11 +1076,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- EXPENSE TRACKER -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="expense-tracker" id="expense-tracker">
+    <!-- ══════ PAGE 8: EXPENSE TRACKER ══════ -->
+    <main class="app-page" id="page-expense-tracker">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Expense Tracker & Vendor Dues</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="expense-tracker" id="expense-tracker">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-receipt"></i> Expense Tracker</span>
@@ -845,11 +1186,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- LIVE EVENT DASHBOARD -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="dashboard" id="dashboard">
+    <!-- ══════ PAGE 9: LIVE EVENT DASHBOARD ══════ -->
+    <main class="app-page" id="page-dashboard">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Real-Time Live Event Dashboard</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="dashboard" id="dashboard">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-gauge-high"></i> Live Dashboard</span>
@@ -930,11 +1292,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- VENDOR DASHBOARD (for vendors) -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="vendor-dashboard" id="vendor-dashboard">
+    <!-- ══════ PAGE 10: VENDOR PORTAL DASHBOARD ══════ -->
+    <main class="app-page" id="page-vendor-dashboard">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">Vendor Portal Dashboard</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="vendor-dashboard" id="vendor-dashboard">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-store"></i> For Vendors</span>
@@ -986,11 +1369,32 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- AI THEME GENERATOR -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="theme-generator" id="theme-generator">
+    <!-- ══════ PAGE 11: AI THEME GENERATOR ══════ -->
+    <main class="app-page" id="page-theme-generator">
+        
+    <!-- Top Breadcrumb Navigation Bar -->
+    <div class="page-breadcrumb-bar">
+        <div class="container breadcrumb-inner">
+            <button class="btn btn-outline btn-sm btn-back-home" onclick="navigateToPage('home')">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <div class="breadcrumb-trail">
+                <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">AI Creative Theme Concepts</span>
+            </div>
+            <div class="breadcrumb-quick-nav">
+                <span class="quick-nav-label">Quick Jump:</span>
+                <button class="quick-nav-pill" onclick="navigateToPage('ai-planner')">AI Planner</button><button class="quick-nav-pill" onclick="navigateToPage('budget-calculator')">Budget</button><button class="quick-nav-pill" onclick="navigateToPage('vendor-marketplace')">Vendors</button><button class="quick-nav-pill" onclick="navigateToPage('invitations')">Invitations</button>
+            </div>
+        </div>
+    </div>
+        <section class="theme-generator" id="theme-generator">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><i class="fas fa-palette"></i> AI Theme Generator</span>
@@ -1028,6 +1432,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- FOOTER -->
