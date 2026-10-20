@@ -176,6 +176,14 @@ function generateICS(events) {
 
 // ─── Request Body Helper ───
 function readJSONBody(req) {
+    if (req.body) {
+        if (typeof req.body === 'object') return Promise.resolve(req.body);
+        try {
+            return Promise.resolve(JSON.parse(req.body));
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }
     return new Promise((resolve, reject) => {
         let body = '';
         req.on('data', chunk => {
@@ -221,9 +229,10 @@ async function handleRequest(req, res) {
 
     const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
+    const pathNormalized = pathname.replace(/^\/api/, '');
 
     // ── API: Section 9 AI Event Planning Engine ──
-    if (req.method === 'POST' && pathname === '/api/ai/plan') {
+    if (req.method === 'POST' && (pathname === '/api/ai/plan' || pathNormalized === '/ai/plan')) {
         try {
             const input = await readJSONBody(req);
             const planOutput = runAIEngine(input);
@@ -237,7 +246,7 @@ async function handleRequest(req, res) {
     }
 
     // ── API: Vendor Marketplace List & Filter ──
-    if (req.method === 'GET' && pathname === '/api/vendors') {
+    if (req.method === 'GET' && (pathname === '/api/vendors' || pathNormalized === '/vendors')) {
         const category = parsedUrl.searchParams.get('category');
         const city = parsedUrl.searchParams.get('city');
         let result = vendorsDB;
@@ -255,7 +264,7 @@ async function handleRequest(req, res) {
     }
 
     // ── API: Vendor Comparison ──
-    if (req.method === 'POST' && pathname === '/api/vendors/compare') {
+    if (req.method === 'POST' && (pathname === '/api/vendors/compare' || pathNormalized === '/vendors/compare')) {
         try {
             const { ids } = await readJSONBody(req);
             const idList = Array.isArray(ids) ? ids.map(Number) : [];
@@ -270,7 +279,7 @@ async function handleRequest(req, res) {
     }
 
     // ── API: Vendor Booking ──
-    if (req.method === 'POST' && pathname === '/api/vendors/book') {
+    if (req.method === 'POST' && (pathname === '/api/vendors/book' || pathNormalized === '/vendors/book')) {
         try {
             const booking = await readJSONBody(req);
             booking.id = 'BK-' + Date.now().toString(36).toUpperCase();
@@ -288,7 +297,7 @@ async function handleRequest(req, res) {
     }
 
     // ── API: RSVP Submission ──
-    if (req.method === 'POST' && pathname === '/api/guests/rsvp') {
+    if (req.method === 'POST' && (pathname === '/api/guests/rsvp' || pathNormalized === '/guests/rsvp')) {
         try {
             const rsvp = await readJSONBody(req);
             rsvp.id = Date.now();
@@ -305,7 +314,7 @@ async function handleRequest(req, res) {
     }
 
     // ── API: Export Google Calendar .ICS ──
-    if (req.method === 'GET' && pathname === '/api/calendar/export') {
+    if (req.method === 'GET' && (pathname === '/api/calendar/export' || pathNormalized === '/calendar/export')) {
         const events = [
             { title: 'Confirm Venue & Walkthrough', description: 'CelebriPlan task reminder: Finalize venue setup and check lighting.', location: 'Banquet Hall' },
             { title: 'Finalize Catering Menu', description: 'Review food menu, live counters and plate count.', location: 'Caterer Office' },
@@ -322,7 +331,14 @@ async function handleRequest(req, res) {
         return;
     }
 
-    // ── Static Files Serving ──
+    // If API endpoint was requested but didn't match
+    if (pathname.startsWith('/api')) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'API route not found' }));
+        return;
+    }
+
+    // ── Static Files Serving (Local standalone server) ──
     let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
     filePath = path.normalize(filePath);
 
@@ -345,6 +361,10 @@ async function handleRequest(req, res) {
 
         res.writeHead(200, { 'Content-Type': contentType });
         const stream = fs.createReadStream(filePath);
+        stream.on('error', () => {
+            if (!res.headersSent) res.writeHead(500);
+            res.end('File read error');
+        });
         stream.pipe(res);
     });
 }
