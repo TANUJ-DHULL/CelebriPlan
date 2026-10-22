@@ -472,6 +472,10 @@ section {
     gap: 0.5rem;
 }
 
+.nav-blueprint-mobile {
+    display: none;
+}
+
 .nav-hamburger {
     display: none;
     flex-direction: column;
@@ -3163,6 +3167,8 @@ section {
         z-index: 5;
     }
     .nav-links.active { display: flex; }
+    .nav-actions .nav-blueprint-btn { display: none; }
+    .nav-blueprint-mobile { display: list-item; }
     .nav-hamburger { display: flex; }
     .nav-cta { display: none; }
 }

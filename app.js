@@ -3117,12 +3117,14 @@ function downloadICSFile() {
 // ═══════════════════════════════════════════
 function initBlueprintModal() {
     const modal = document.getElementById('blueprint-modal');
-    const openBtn = document.getElementById('nav-blueprint-btn');
+    const openBtns = document.querySelectorAll('.nav-blueprint-btn');
     const closeBtn = document.getElementById('blueprint-modal-close');
 
-    if (openBtn && modal) {
-        openBtn.addEventListener('click', () => {
-            modal.classList.add('active');
+    if (modal) {
+        openBtns.forEach(openBtn => {
+            openBtn.addEventListener('click', () => {
+                modal.classList.add('active');
+            });
         });
     }
 
