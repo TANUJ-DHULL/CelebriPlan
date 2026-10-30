@@ -68,14 +68,15 @@ test('mobile menu is keyboard-operable and exposes expanded state', async ({page
     await expect(menu).toHaveAttribute('aria-expanded','false');
     await expect(page.locator('#page-ai-planner')).toBeVisible();
 });
-test('primary pages pass WCAG A/AA automated accessibility checks', async ({page}) => {
-    test.setTimeout(150000);
-    for (const route of ['','ai-planner','budget-calculator','vendor-marketplace','invitations','venue-3d','guest-management','expense-tracker','dashboard','vendor-dashboard','theme-generator']) {
+for (const route of ['', 'ai-planner', 'budget-calculator', 'vendor-marketplace', 'invitations', 'venue-3d', 'guest-management', 'expense-tracker', 'dashboard', 'vendor-dashboard', 'theme-generator']) {
+    test(`accessibility: ${route || 'home'} passes WCAG A/AA automated checks`, async ({page}) => {
+        test.setTimeout(60000);
         await page.goto(route ? '/#/' + route : '/');
-        const results = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
-        expect.soft(results.violations.map(v => ({route, id:v.id, impact:v.impact, nodes:v.nodes.map(n => n.target)}))).toEqual([]);
-    }
-});
+        const results = await new AxeBuilder({page})
+            .withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+        expect(results.violations.map(v => ({id:v.id, impact:v.impact, nodes:v.nodes.map(n => n.target)}))).toEqual([]);
+    });
+}
 test('invitation QR is decodable and card download contains a real PNG', async ({page}) => {
     const jsQR = require('jsqr');
     await page.goto('/#/invitations');
