@@ -43,7 +43,7 @@ test('optional routes load once and retain controls when revisited', async ({ pa
 test('failed optional feature leaves navigation usable and explains recovery', async ({ page }) => {
     await page.route('**/features/venue.mjs', route => route.abort());
     await page.goto('/#/venue-3d');
-    await expect(page.getByRole('status')).toContainText('Reload the page to try again');
+    await expect(page.getByRole('alert')).toContainText('Reload the page to try again');
     await expect(page.locator('#page-venue-3d')).toHaveAttribute('aria-busy', 'false');
     await page.locator('#nav-links [data-page="ai-planner"]').click();
     await expect(page.locator('#page-ai-planner')).toBeVisible();
