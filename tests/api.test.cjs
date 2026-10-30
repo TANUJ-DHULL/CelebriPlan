@@ -16,7 +16,7 @@ after(() => new Promise(resolve => server.close(resolve)));
 const post = (path, body, headers = {}) => fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body) });
 
 test('all public assets are served with safe content types and security headers', async () => {
-    for (const path of ['/', '/app.js', '/styles.css', '/planning.js']) {
+    for (const path of ['/', '/app.js', '/styles.css', '/planning.js', '/features/venue.mjs', '/features/themes.mjs', '/features/vendor-dashboard.mjs']) {
         const response = await fetch(base + path);
         assert.equal(response.status, 200);
         assert.equal(response.headers.get('x-content-type-options'), 'nosniff');

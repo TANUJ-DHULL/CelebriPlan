@@ -18,11 +18,18 @@ test('planner generates immediately, keeps exact budget, and applies tasks to da
     await page.locator('#event-budget').fill('75005');
     await page.locator('#generate-plan-btn').click();
     await expect(page.locator('#plan-result')).toContainText('75,005');
+    const plannedTasks = await page.locator('.plan-section').filter({has:page.getByRole('heading',{name:'Planning Checklist'})}).locator('.plan-task span').allTextContents();
+    const plannedAmounts = await page.locator('#plan-result .budget-bar-value').allTextContents();
+    const plannedTimeline = await page.locator('#plan-result .timeline-activity').allTextContents();
     await page.getByRole('button', {name:'Apply to Dashboard'}).click();
     await page.goto('/#/dashboard');
-    await expect(page.locator('#tasks-list .task-item')).toHaveCount(4);
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(plannedTasks.length);
+    for (const title of plannedTasks) await expect(page.locator('#tasks-list')).toContainText(title);
+    for (const title of plannedTimeline) await expect(page.locator('#event-timeline')).toContainText(title);
     await page.goto('/#/expense-tracker');
     await expect(page.locator('#exp-total-budget')).toContainText('75,005');
+    expect(await page.locator('#expense-items .expense-item-amount').allTextContents()).toEqual(plannedAmounts);
+    await expect(page.locator('#expense-items .expense-item-status')).toHaveText(plannedAmounts.map(() => 'Pending'));
 });
 test('malicious guest, task, city and chat input renders as text without executing', async ({page}) => {
     const attack = '<img src=x onerror="window.__xss=1">';
@@ -173,7 +180,7 @@ test('guest CSV import and saved event budget/tasks survive a full reload', asyn
     await page.reload();
     await expect(page.locator('#guest-table-body')).toContainText('Doe, Jane');
     await page.goto('/#/dashboard');
-    await expect(page.locator('#tasks-list .task-item')).toHaveCount(4);
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(10);
     await page.goto('/#/expense-tracker');
     await expect(page.locator('#exp-total-budget')).toContainText('75,005');
 });

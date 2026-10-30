@@ -82,14 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initExpenseTracker();
     initDashboard();
     initGoogleCalendarIntegration();
-    initVendorDashboard();
-    initThemeGenerator();
     initChatbot();
     initThemeToggle();
     initSmoothScroll();
     initFooterLinks();
     initAccessibility();
-    initScrollAnimations();
     initEventPersistence();
     // Run initial budget calculation
     calculateBudget();
@@ -98,20 +95,48 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════
 // MULTI-PAGE ROUTER & NAVIGATION
 // ═══════════════════════════════════════════
+const VALID_PAGES = Object.freeze([
+    'home', 'ai-planner', 'budget-calculator', 'vendor-marketplace',
+    'invitations', 'venue-3d', 'guest-management', 'expense-tracker',
+    'dashboard', 'vendor-dashboard', 'theme-generator'
+]);
+const PAGE_FEATURES = {
+    'venue-3d': () => import('./features/venue.mjs'),
+    'vendor-dashboard': () => import('./features/vendor-dashboard.mjs'),
+    'theme-generator': () => import('./features/themes.mjs'),
+};
+const featureLoads = new Map();
+let activeRoute = null;
+function loadPageFeature(pageName) {
+    if (!PAGE_FEATURES[pageName]) return;
+    const page = document.getElementById(`page-${pageName}`);
+    if (!featureLoads.has(pageName)) {
+        page.setAttribute('aria-busy', 'true');
+        featureLoads.set(pageName, PAGE_FEATURES[pageName]().then(feature => {
+            feature.initialize({ showToast });
+            page.dataset.ready = 'true';
+        }).catch(() => {
+            showToast('This feature could not load. Reload the page to try again.', 'error');
+        }).finally(() => page.setAttribute('aria-busy', 'false')));
+    }
+    featureLoads.get(pageName).then(() => {
+        if (activeRoute === 'venue-3d') {
+            window.redrawVenue3D?.();
+            window.startVenueAnimation?.();
+        }
+    });
+}
 function navigateToPage(pageName) {
     if (!pageName || pageName === '#' || pageName === '') pageName = 'home';
     pageName = pageName.replace(/^#\/?/, '').replace(/\/$/, '');
 
-    const validPages = [
-        'home', 'ai-planner', 'budget-calculator', 'vendor-marketplace',
-        'invitations', 'venue-3d', 'guest-management', 'expense-tracker',
-        'dashboard', 'vendor-dashboard', 'theme-generator'
-    ];
 
-    if (!validPages.includes(pageName)) {
+    if (!VALID_PAGES.includes(pageName)) {
         pageName = 'home';
     }
 
+    if (activeRoute === pageName) return;
+    activeRoute = pageName;
     // 1. Toggle visibility of app pages
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
@@ -135,10 +160,8 @@ function navigateToPage(pageName) {
         else link.removeAttribute('aria-current');
     });
     if (window.stopVenueAnimation) window.stopVenueAnimation();
-    if (pageName === 'venue-3d') {
-        if (!window.redrawVenue3D) init3DVenuePreview();
-        if (window.startVenueAnimation) window.startVenueAnimation();
-    }
+    loadPageFeature(pageName);
+    window.refreshCountdown?.();
     const heading = targetPage?.querySelector('h1, h2');
     if (heading) { heading.tabIndex = -1; heading.focus({preventScroll:true}); }
 
@@ -179,31 +202,23 @@ function initPageRouter() {
         navigateToPage(window.location.hash);
     });
 
-    const validPages = [
-        'home', 'ai-planner', 'budget-calculator', 'vendor-marketplace',
-        'invitations', 'venue-3d', 'guest-management', 'expense-tracker',
-        'dashboard', 'vendor-dashboard', 'theme-generator'
-    ];
 
     // Universal click delegate for all page navigations (buttons, data-page, footer & hero anchors)
     document.addEventListener('click', (e) => {
-        // 1. Element with data-page attribute
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        // Navigation has one delegated handler, including nested card buttons.
         const targetBtn = e.target.closest('[data-page]');
-        if (targetBtn && !targetBtn.classList.contains('nav-link')) {
+        if (targetBtn) {
             const page = targetBtn.dataset.page;
             if (page) {
                 e.preventDefault();
                 navigateToPage(page);
+                document.getElementById('nav-links').classList.remove('active');
+                const menu = document.getElementById('nav-hamburger');
+                menu.classList.remove('active');
+                menu.setAttribute('aria-expanded', 'false');
                 return;
             }
-        }
-
-        // 2. Logo click
-        const logo = e.target.closest('.nav-logo, #nav-logo');
-        if (logo) {
-            e.preventDefault();
-            navigateToPage('home');
-            return;
         }
 
         // 3. Anchor links (e.g. footer links, hero CTAs, navbar hrefs)
@@ -212,7 +227,7 @@ function initPageRouter() {
             const href = anchor.getAttribute('href');
             if (href) {
                 const cleanHref = href.replace(/^#\/?/, '').replace(/\/$/, '');
-                if (validPages.includes(cleanHref)) {
+                if (VALID_PAGES.includes(cleanHref)) {
                     e.preventDefault();
                     navigateToPage(cleanHref);
                     return;
@@ -230,8 +245,16 @@ function initNavbar() {
     // Scroll shadow effect
     window.addEventListener('scroll', () => {
         if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
-    });
+    }, { passive: true });
 
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            hamburger.focus();
+        }
+    });
     // Hamburger toggle for mobile
     if (hamburger && navLinks) {
         hamburger.addEventListener('click', () => {
@@ -239,29 +262,6 @@ function initNavbar() {
             navLinks.classList.toggle('active');
             hamburger.setAttribute('aria-expanded', String(navLinks.classList.contains('active')));
         });
-
-        // Close nav on link click
-        navLinks.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-                hamburger.setAttribute('aria-expanded', 'false');
-                const page = link.dataset.page;
-                if (page) {
-                    navigateToPage(page);
-                }
-            });
-        });
-    }
-
-    const navLogo = document.getElementById('nav-logo');
-    if (navLogo) {
-        navLogo.addEventListener('click', () => navigateToPage('home'));
-    }
-
-    const navGetStarted = document.getElementById('nav-get-started');
-    if (navGetStarted) {
-        navGetStarted.addEventListener('click', () => navigateToPage('ai-planner'));
     }
 }
 
@@ -312,6 +312,10 @@ function initCounters() {
 
 function animateCounter(el) {
     const target = parseInt(el.dataset.count);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.textContent = target.toLocaleString();
+        return;
+    }
     const duration = 2000;
     const start = performance.now();
 
@@ -416,11 +420,9 @@ const AIPlanner = {
         const timeline = [];
         const activityDuration = duration / config.activities.length;
         config.activities.forEach((activity, i) => {
-            const hours = startHour + (i * activityDuration);
-            const h = Math.floor(hours);
-            const m = Math.round((hours - h) * 60);
+            const minutes = Math.round((startHour + i * activityDuration) * 60) % 1440;
             timeline.push({
-                start: `${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+                start: `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`,
                 activity
             });
         });
@@ -428,7 +430,7 @@ const AIPlanner = {
         // Generate tasks
         const baseTasks = [
             { task: `Book ${budgetCategory.toLowerCase()} venue in ${city}`, priority: 'high', deadline: '2 weeks before' },
-            { task: `Finalize ${food === 'veg' ? 'vegetarian' : food === 'nonveg' ? 'non-veg' : 'multi-cuisine'} menu for ${guests} guests`, priority: 'high', deadline: '10 days before' },
+            { task: `Finalize ${food === 'veg' ? 'vegetarian' : food === 'nonveg' ? 'non-veg' : food === 'jain' ? 'Jain' : 'multi-cuisine'} menu for ${guests} guests`, priority: 'high', deadline: '10 days before' },
             { task: `Send invitations to all ${guests} guests`, priority: 'high', deadline: '1 week before' },
             { task: `Confirm ${theme} theme decorations`, priority: 'medium', deadline: '5 days before' },
             { task: 'Book photographer & videographer', priority: 'medium', deadline: '1 week before' },
@@ -515,101 +517,7 @@ const AIPlanner = {
         return str.replace(/\b\w/g, l => l.toUpperCase());
     },
 
-    buildDashboardPlan(input) {
-        const type = (input.type || 'birthday').toLowerCase();
-        const city = input.city || 'Jind';
-        const guests = parseInt(input.guests, 10) || 50;
-        const theme = (input.theme || 'modern').toLowerCase();
-        const durationHours = parseInt(input.durationHours, 10) || 4;
 
-        let budgetPaise = input.budgetPaise;
-        let budgetInRupees = 50000;
-        if (budgetPaise !== undefined && budgetPaise !== null) {
-            budgetInRupees = Math.round(Number(budgetPaise) / 100);
-        } else if (input.budget !== undefined && input.budget !== null) {
-            budgetInRupees = Math.round(Number(input.budget));
-            budgetPaise = budgetInRupees * 100;
-        }
-
-        const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-        let title = `${capitalize(theme)} ${capitalize(type)} Celebration`;
-        if (type === 'college-fest' || type === 'fest') title = `${capitalize(theme)} College Fest`;
-        if (type === 'corporate') title = `${capitalize(theme)} Corporate Event`;
-        if (type === 'wedding') title = `${capitalize(theme)} Royal Wedding`;
-
-        let ratios;
-        if (type === 'birthday') {
-            ratios = { venue: 0.30, food: 0.35, decoration: 0.15, photography: 0.10, other: 0.10 };
-        } else if (type === 'wedding') {
-            ratios = { venue: 0.30, food: 0.30, decoration: 0.15, photography: 0.15, other: 0.10 };
-        } else if (type === 'college-fest') {
-            ratios = { venue: 0.20, food: 0.25, decoration: 0.15, photography: 0.10, other: 0.30 };
-        } else {
-            ratios = { venue: 0.28, food: 0.32, decoration: 0.16, photography: 0.12, other: 0.12 };
-        }
-
-        const budget = CelebrationPlanning.allocateBudget(budgetInRupees, ratios);
-
-        let tasks;
-        if (type === 'birthday') {
-            tasks = [
-                "Confirm venue",
-                "Finalize food menu",
-                "Send invitations",
-                "Confirm photographer"
-            ];
-        } else if (type === 'wedding') {
-            tasks = [
-                "Confirm wedding venue and mandap",
-                "Finalize food menu and tasting",
-                "Send invitations with QR passes",
-                "Confirm photographer & cinematography"
-            ];
-        } else if (type === 'college-fest') {
-            tasks = [
-                "Confirm auditorium and stage setup",
-                "Finalize food stalls and catering",
-                "Send invitations and entry passes",
-                "Confirm DJ, sound setup & photographer"
-            ];
-        } else {
-            tasks = [
-                "Confirm banquet venue",
-                "Finalize food menu and tea service",
-                "Send corporate invitations",
-                "Confirm event photographer and keynote"
-            ];
-        }
-
-        const timeline = [];
-        if (type === 'birthday') {
-            timeline.push({ start: "18:00", activity: "Guest arrival" });
-            timeline.push({ start: "19:00", activity: "Cake ceremony" });
-            if (durationHours >= 3) {
-                timeline.push({ start: "19:45", activity: "Games, music & dance" });
-            }
-            if (durationHours >= 4) {
-                timeline.push({ start: "20:45", activity: "Dinner buffet & return gifts" });
-            }
-        } else if (type === 'wedding') {
-            timeline.push({ start: "18:00", activity: "Guest arrival & welcome" });
-            timeline.push({ start: "19:30", activity: "Jaimala garland ceremony" });
-            timeline.push({ start: "20:30", activity: "Grand banquet dinner" });
-            timeline.push({ start: "22:00", activity: "Pheras and sacred rituals" });
-        } else {
-            timeline.push({ start: "10:00", activity: "Guest arrival & registration" });
-            timeline.push({ start: "11:30", activity: "Keynote presentation" });
-            timeline.push({ start: "13:30", activity: "Networking luncheon" });
-            timeline.push({ start: "15:30", activity: "Awards ceremony & closure" });
-        }
-
-        return {
-            title,
-            budget,
-            tasks,
-            timeline
-        };
-    }
 };
 
 function initAIPlannerForm() {
@@ -692,18 +600,14 @@ function renderPlanResult(plan, container) {
         photography: '#3b82f6', entertainment: '#10b981', other: '#6366f1'
     };
 
-    // Prepare the plan used by dashboard tasks and expenses
-    const dashboardPlan = AIPlanner.buildDashboardPlan({
-        type: plan.rawType || 'birthday',
-        city: plan.city || 'Jind',
-        guests: plan.guests || 50,
-        budget: plan.totalBudget || 50000,
-        theme: plan.rawTheme || 'modern',
-        durationHours: plan.duration || 4
-    });
-    AppState.dashboardPlan = plan.mode === 'generative'
-        ? {title:plan.title,budget:plan.budget,tasks:plan.tasks.map(item => item.task),timeline:plan.timeline}
-        : dashboardPlan;
+    // Apply exactly the plan shown to the user; never recompute a different
+    // budget, checklist or timeline when moving to the dashboard.
+    AppState.dashboardPlan = {
+        title: plan.title,
+        budget: plan.budget,
+        tasks: plan.tasks.map(item => item.task),
+        timeline: plan.timeline
+    };
     container.innerHTML = `
         <p class="plan-source" role="status">${plan.mode === 'generative' ? 'Personalised with Google Gemini' : 'Built-in planning mode'}${plan.notice ? ` — ${escapeHTML(plan.notice)}` : ''}</p>
         <div class="plan-result-header">
@@ -817,9 +721,9 @@ function applyPlanToLiveDashboard() {
         AppState.expenses = Object.entries(budget).map(([cat, amount], i) => ({
             id: Date.now() + 100 + i,
             desc: `${title} - ${cat.charAt(0).toUpperCase() + cat.slice(1)} Setup`,
-            category: cat === 'venue' ? 'venue' : (cat === 'food' ? 'food' : (cat === 'decoration' ? 'decoration' : (cat === 'photography' ? 'photography' : 'other'))),
+            category: cat,
             amount: amount,
-            status: i === 0 ? 'paid' : (i === 1 ? 'partial' : 'pending')
+            status: 'pending'
         }));
         renderExpenses();
     }
@@ -1256,340 +1160,6 @@ function downloadBlob(blob, filename) {
 // ═══════════════════════════════════════════
 // 3D VENUE PREVIEW
 // ═══════════════════════════════════════════
-function init3DVenuePreview() {
-    const canvas = document.getElementById('venue-canvas');
-    if (!canvas) return;
-
-    let venueType = 'banquet';
-    let lighting = 'warm';
-    let layout = 'round';
-    let decorColor = 'rose';
-    let capacity = 100;
-    let rotation = 0;
-    let animating = true;
-    let zoom = 1;
-
-    function draw() {
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width = canvas.offsetWidth || 800;
-        const h = canvas.height = canvas.offsetHeight || 500;
-
-        // Background based on venue type
-        const bgColors = {
-            banquet: ['#1a1a3e', '#2d1b69'],
-            outdoor: ['#1a3a2e', '#0d2b1a'],
-            rooftop: ['#1a2a3e', '#0d1b2b'],
-            beach: ['#2a1a3e', '#1b0d2b']
-        };
-        const [bg1, bg2] = bgColors[venueType] || bgColors.banquet;
-        const gradient = ctx.createLinearGradient(0, 0, 0, h);
-        gradient.addColorStop(0, bg1);
-        gradient.addColorStop(1, bg2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.translate(w / 2,h / 2);
-        ctx.scale(zoom,zoom);
-        ctx.translate(-w / 2,-h / 2);
-        canvas.dataset.zoom = String(zoom);
-
-        // Floor
-        ctx.fillStyle = 'rgba(255,255,255,0.03)';
-        ctx.beginPath();
-        ctx.moveTo(w * 0.1, h * 0.7);
-        ctx.lineTo(w * 0.9, h * 0.7);
-        ctx.lineTo(w * 0.8, h * 0.95);
-        ctx.lineTo(w * 0.2, h * 0.95);
-        ctx.closePath();
-        ctx.fill();
-
-        // Floor grid lines
-        ctx.strokeStyle = 'rgba(124, 58, 237, 0.08)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 10; i++) {
-            const t = i / 10;
-            ctx.beginPath();
-            ctx.moveTo(w * (0.1 + t * 0.8), h * 0.7);
-            ctx.lineTo(w * (0.2 + t * 0.6), h * 0.95);
-            ctx.stroke();
-        }
-
-        // Lighting effects
-        const lightColors = {
-            warm: ['rgba(255, 167, 38, 0.15)', 'rgba(255, 112, 67, 0.1)'],
-            cool: ['rgba(66, 165, 245, 0.15)', 'rgba(126, 87, 194, 0.1)'],
-            neon: ['rgba(224, 64, 251, 0.15)', 'rgba(0, 229, 255, 0.1)'],
-            fairy: ['rgba(255, 213, 79, 0.2)', 'rgba(255, 171, 64, 0.15)']
-        };
-        const [light1, light2] = lightColors[lighting] || lightColors.warm;
-
-        // Ceiling lights
-        for (let i = 0; i < 5; i++) {
-            const lx = w * (0.2 + i * 0.15);
-            const ly = h * 0.15;
-            const lightGrad = ctx.createRadialGradient(lx, ly, 0, lx, ly, 100);
-            lightGrad.addColorStop(0, light1);
-            lightGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = lightGrad;
-            ctx.fillRect(lx - 100, ly - 50, 200, 200);
-
-            // Light fixture
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.beginPath();
-            ctx.arc(lx, ly, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Light beam
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-            ctx.beginPath();
-            ctx.moveTo(lx, ly);
-            ctx.lineTo(lx - 30, h * 0.7);
-            ctx.moveTo(lx, ly);
-            ctx.lineTo(lx + 30, h * 0.7);
-            ctx.stroke();
-        }
-
-        // Fairy lights (if fairy mode)
-        if (lighting === 'fairy') {
-            for (let i = 0; i < 30; i++) {
-                const fx = w * 0.1 + Math.random() * w * 0.8;
-                const fy = h * 0.1 + Math.random() * h * 0.3;
-                ctx.fillStyle = `rgba(255, 213, 79, ${Math.random() * 0.6 + 0.2})`;
-                ctx.beginPath();
-                ctx.arc(fx, fy, 2 + Math.random() * 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // Decoration color accents
-        const decorColors = {
-            rose: ['rgba(244, 143, 177, 0.3)', '#f48fb1'],
-            gold: ['rgba(255, 213, 79, 0.3)', '#ffd54f'],
-            blue: ['rgba(100, 181, 246, 0.3)', '#64b5f6'],
-            green: ['rgba(129, 199, 132, 0.3)', '#81c784'],
-            purple: ['rgba(179, 157, 219, 0.3)', '#b39ddb'],
-            white: ['rgba(224, 224, 224, 0.3)', '#e0e0e0']
-        };
-        const [dGlow, dColor] = decorColors[decorColor] || decorColors.rose;
-
-        // Stage / Backdrop
-        ctx.fillStyle = 'rgba(124, 58, 237, 0.15)';
-        ctx.fillRect(w * 0.3, h * 0.2, w * 0.4, h * 0.35);
-        ctx.strokeStyle = dColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(w * 0.3, h * 0.2, w * 0.4, h * 0.35);
-
-        // Stage decoration
-        ctx.fillStyle = dGlow;
-        ctx.fillRect(w * 0.32, h * 0.22, w * 0.36, h * 0.31);
-
-        // Stage text
-        ctx.fillStyle = dColor;
-        ctx.font = 'bold 16px Outfit';
-        ctx.textAlign = 'center';
-        ctx.fillText('🎉 STAGE 🎉', w * 0.5, h * 0.4);
-
-        // Tables based on layout
-        const tableCount = Math.min(Math.ceil(capacity / 8), 12);
-
-        if (layout === 'round') {
-            for (let i = 0; i < tableCount; i++) {
-                const row = Math.floor(i / 4);
-                const col = i % 4;
-                const tx = w * (0.2 + col * 0.2);
-                const ty = h * (0.65 + row * 0.12);
-
-                // Table
-                ctx.fillStyle = 'rgba(124, 58, 237, 0.2)';
-                ctx.beginPath();
-                ctx.arc(tx, ty, 18, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = dColor;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Chairs around table
-                for (let c = 0; c < 8; c++) {
-                    const angle = (c / 8) * Math.PI * 2 + rotation;
-                    const cx = tx + Math.cos(angle) * 28;
-                    const cy = ty + Math.sin(angle) * 28;
-                    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        } else if (layout === 'long') {
-            for (let i = 0; i < Math.min(tableCount, 6); i++) {
-                const tx = w * 0.2;
-                const ty = h * (0.62 + i * 0.06);
-
-                ctx.fillStyle = 'rgba(124, 58, 237, 0.2)';
-                ctx.fillRect(tx, ty - 6, w * 0.6, 12);
-                ctx.strokeStyle = dColor;
-                ctx.lineWidth = 1;
-                ctx.strokeRect(tx, ty - 6, w * 0.6, 12);
-
-                // Chairs on both sides
-                for (let c = 0; c < 10; c++) {
-                    const cx = tx + (c / 10) * w * 0.6 + w * 0.03;
-                    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                    ctx.beginPath();
-                    ctx.arc(cx, ty - 14, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(cx, ty + 14, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        } else { // cocktail
-            for (let i = 0; i < tableCount; i++) {
-                const tx = w * (0.15 + (i % 5) * 0.17);
-                const ty = h * (0.65 + Math.floor(i / 5) * 0.15);
-
-                ctx.fillStyle = 'rgba(124, 58, 237, 0.2)';
-                ctx.beginPath();
-                ctx.arc(tx, ty, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = dColor;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                // Stand
-                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-                ctx.beginPath();
-                ctx.moveTo(tx, ty + 10);
-                ctx.lineTo(tx, ty + 25);
-                ctx.stroke();
-            }
-        }
-
-        // Entrance
-        ctx.fillStyle = dColor;
-        ctx.font = 'bold 11px Outfit';
-        ctx.textAlign = 'center';
-        ctx.fillText('↑ ENTRANCE', w * 0.5, h * 0.98);
-
-        // Venue-specific decorations
-        if (venueType === 'outdoor') {
-            // Trees
-            for (let i = 0; i < 4; i++) {
-                const treeX = i < 2 ? w * 0.05 : w * 0.92;
-                const treeY = h * (0.3 + (i % 2) * 0.3);
-                ctx.fillStyle = 'rgba(129, 199, 132, 0.3)';
-                ctx.beginPath();
-                ctx.arc(treeX, treeY, 25, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        } else if (venueType === 'beach') {
-            // Waves
-            ctx.strokeStyle = 'rgba(100, 181, 246, 0.2)';
-            ctx.lineWidth = 2;
-            for (let w2 = 0; w2 < 3; w2++) {
-                ctx.beginPath();
-                for (let x = 0; x < w; x += 5) {
-                    ctx.lineTo(x, h * 0.08 + Math.sin(x * 0.02 + w2 + rotation) * 8);
-                }
-                ctx.stroke();
-            }
-        }
-    }
-
-    // Initial draw & expose for multi-page switcher
-    draw();
-    window.redrawVenue3D = draw;
-
-    // Auto-rotate
-    let frameId = null;
-    function animate() {
-        frameId = null;
-        if (document.hidden || !document.getElementById('page-venue-3d').classList.contains('active')) return;
-        if (!animating || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        rotation += 0.005;
-        draw();
-        frameId = requestAnimationFrame(animate);
-    }
-    window.startVenueAnimation = () => { if (frameId === null) animate(); };
-    window.stopVenueAnimation = () => { if (frameId !== null) cancelAnimationFrame(frameId); frameId = null; };
-    document.addEventListener('visibilitychange', () => {
-        window.stopVenueAnimation();
-        if (!document.hidden && document.getElementById('page-venue-3d').classList.contains('active')) window.startVenueAnimation();
-    });
-
-    // Controls
-    document.querySelectorAll('.venue-type-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.venue-type-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            venueType = btn.dataset.venue;
-            updateVenueInfoBadge();
-            draw();
-        });
-    });
-
-    document.querySelectorAll('.lighting-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.lighting-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            lighting = btn.dataset.lighting;
-            updateVenueInfoBadge();
-            draw();
-        });
-    });
-
-    document.querySelectorAll('.layout-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            layout = btn.dataset.layout;
-            updateVenueInfoBadge();
-            draw();
-        });
-    });
-
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            decorColor = btn.dataset.color;
-            draw();
-        });
-    });
-
-    document.getElementById('venue-capacity').addEventListener('input', (e) => {
-        capacity = parseInt(e.target.value);
-        document.getElementById('venue-capacity-val').textContent = capacity;
-        updateVenueInfoBadge();
-        draw();
-    });
-
-    function updateVenueInfoBadge() {
-        const badge = document.getElementById('venue-info-badge');
-        const names = { banquet: 'Banquet Hall', outdoor: 'Outdoor Garden', rooftop: 'Rooftop', beach: 'Beach Venue' };
-        const layouts = { round: 'Round tables', long: 'Long tables', cocktail: 'Cocktail' };
-        badge.querySelector('.venue-name').textContent = names[venueType] || 'Venue';
-        badge.querySelector('.venue-details').textContent = `${capacity} guests • ${lighting.charAt(0).toUpperCase() + lighting.slice(1)} lighting • ${layouts[layout]}`;
-    }
-
-    // 3D Controls
-    document.getElementById('v3d-rotate').addEventListener('click', () => {
-        animating = !animating;
-        document.getElementById('v3d-rotate').setAttribute('aria-pressed',String(animating));
-        if (animating) window.startVenueAnimation(); else window.stopVenueAnimation();
-    });
-    document.getElementById('v3d-rotate').setAttribute('aria-pressed','true');
-    document.getElementById('v3d-zoom-in').addEventListener('click',()=>{zoom=Math.min(1.6,Math.round((zoom+.1)*10)/10);draw();});
-    document.getElementById('v3d-zoom-out').addEventListener('click',()=>{zoom=Math.max(.6,Math.round((zoom-.1)*10)/10);draw();});
-    document.getElementById('v3d-fullscreen').addEventListener('click',async()=>{
-        try {
-            if (document.fullscreenElement) await document.exitFullscreen();
-            else await canvas.parentElement.requestFullscreen();
-            draw();
-        } catch {showToast('Fullscreen is unavailable in this browser','info');}
-    });
-    document.addEventListener('fullscreenchange',draw);
-}
-
 // ═══════════════════════════════════════════
 // GUEST MANAGEMENT
 // ═══════════════════════════════════════════
@@ -2017,233 +1587,24 @@ function startCountdown() {
         document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
     }
 
-    update();
-    setInterval(update, 1000);
+    let timer;
+    window.refreshCountdown = () => {
+        clearInterval(timer);
+        if (!document.hidden && activeRoute === 'dashboard') {
+            update();
+            timer = setInterval(update, 1000);
+        }
+    };
+    document.addEventListener('visibilitychange', window.refreshCountdown);
+    window.refreshCountdown();
 }
 
 // ═══════════════════════════════════════════
 // VENDOR DASHBOARD
 // ═══════════════════════════════════════════
-function initVendorDashboard() {
-    // Services
-    const services = [
-        { name: 'Wedding Photography', price: '₹25,000 - ₹75,000', desc: 'Full day coverage with album' },
-        { name: 'Pre-Wedding Shoot', price: '₹15,000 - ₹40,000', desc: '4 hours outdoor/indoor shoot' },
-        { name: 'Event Videography', price: '₹20,000 - ₹60,000', desc: 'Cinematic film with drone coverage' },
-    ];
-
-    document.getElementById('vd-services-list').innerHTML = services.map(s => `
-        <div class="vd-service-card">
-            <div class="vd-service-name">${s.name}</div>
-            <div class="vd-service-price">${s.price}</div>
-            <div class="vd-service-desc">${s.desc}</div>
-        </div>
-    `).join('');
-
-    // Calendar
-    renderVendorCalendar();
-
-    // Bookings
-    const bookings = [
-        { name: 'Sharma Wedding', date: 'Nov 5, 2026 • 10:00 AM', amount: '₹45,000' },
-        { name: 'Corporate Annual Meet', date: 'Nov 12, 2026 • 09:00 AM', amount: '₹35,000' },
-        { name: 'Mehta Engagement', date: 'Nov 18, 2026 • 06:00 PM', amount: '₹25,000' },
-        { name: 'Gupta Birthday', date: 'Nov 22, 2026 • 07:00 PM', amount: '₹15,000' },
-    ];
-
-    document.getElementById('vd-bookings-list').innerHTML = bookings.map(b => `
-        <div class="vd-booking-item">
-            <div class="vd-booking-info">
-                <span class="vd-booking-name">${b.name}</span>
-                <span class="vd-booking-date">${b.date}</span>
-            </div>
-            <span class="vd-booking-amount">${b.amount}</span>
-        </div>
-    `).join('');
-}
-
-function renderVendorCalendar() {
-    const grid = document.getElementById('vd-calendar-grid');
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDay = new Date(year, month, 1).getDay();
-    const today = now.getDate();
-
-    const bookedDays = [5, 12, 18, 22, 25];
-    const headers = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-    let html = headers.map(h => `<div class="cal-header">${h}</div>`).join('');
-
-    // Empty cells before first day
-    for (let i = 0; i < firstDay; i++) {
-        html += '<div class="cal-day empty"></div>';
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        let classes = 'cal-day';
-        if (d === today) classes += ' today';
-        else if (bookedDays.includes(d)) classes += ' booked';
-        else if (d > today) classes += ' available';
-        html += `<div class="${classes}">${d}</div>`;
-    }
-
-    grid.innerHTML = html;
-}
-
 // ═══════════════════════════════════════════
 // AI THEME GENERATOR
 // ═══════════════════════════════════════════
-function initThemeGenerator() {
-    // Mood buttons
-    document.querySelectorAll('.mood-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    // Season buttons
-    document.querySelectorAll('.season-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    // Generate
-    document.getElementById('generate-theme-btn').addEventListener('click', generateThemeConcepts);
-
-    // Initial generation
-    generateThemeConcepts();
-}
-
-function generateThemeConcepts() {
-    const mood = document.querySelector('.mood-btn.active')?.dataset.mood || 'romantic';
-    const season = document.querySelector('.season-btn.active')?.dataset.season || 'spring';
-
-    const concepts = getThemeConcepts(mood, season);
-    const container = document.getElementById('theme-gen-results');
-
-    container.innerHTML = concepts.map(c => `
-        <div class="theme-concept-card">
-            <div class="theme-concept-preview" style="background:${c.gradient}">
-                <i class="fas ${c.icon}"></i>
-            </div>
-            <div class="theme-concept-info">
-                <div class="theme-concept-name">${c.name}</div>
-                <div class="theme-concept-desc">${c.description}</div>
-                <div class="theme-palette">
-                    ${c.colors.map(color => `<div class="palette-swatch" style="background:${color}"></div>`).join('')}
-                </div>
-                <div class="theme-elements">
-                    ${c.elements.map(el => `<span class="theme-tag">${el}</span>`).join('')}
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function getThemeConcepts(mood, season) {
-    const conceptsDB = {
-        romantic: {
-            spring: [
-                { name: '🌸 Cherry Blossom Romance', description: 'Soft pink petals, gentle lighting, and romantic arches create a dreamy spring atmosphere.', gradient: 'linear-gradient(135deg, #fce4ec, #f8bbd0)', icon: 'fa-heart', colors: ['#f48fb1', '#ce93d8', '#fff9c4', '#c8e6c9', '#ffffff'], elements: ['Cherry Blossom Arches', 'Floating Candles', 'Pastel Draping', 'Petal Walkway'] },
-                { name: '🌿 Garden of Love', description: 'Lush greenery with white florals, string lights, and natural wood elements.', gradient: 'linear-gradient(135deg, #c8e6c9, #a5d6a7)', icon: 'fa-leaf', colors: ['#81c784', '#ffffff', '#e8f5e9', '#ffcc80', '#a5d6a7'], elements: ['Living Walls', 'Wooden Arches', 'White Roses', 'Fairy Light Canopy'] },
-            ],
-            summer: [
-                { name: '🌅 Golden Hour Romance', description: 'Warm golden tones, sunset-inspired décor with cascading fairy lights.', gradient: 'linear-gradient(135deg, #ffe0b2, #ffcc80)', icon: 'fa-sun', colors: ['#ffb74d', '#ff8a65', '#fff3e0', '#d4e157', '#ffffff'], elements: ['Golden Drapes', 'Sunset Backdrop', 'Warm Fairy Lights', 'Marigold Strings'] },
-                { name: '🏖️ Beach Romance', description: 'Oceanic blues with seashell accents, flowing fabrics, and candlelit paths.', gradient: 'linear-gradient(135deg, #b3e5fc, #81d4fa)', icon: 'fa-umbrella-beach', colors: ['#4fc3f7', '#ffffff', '#e1f5fe', '#ffcc80', '#80cbc4'], elements: ['Seashell Centerpieces', 'Flowing Fabric', 'Bamboo Torches', 'Sand Path'] },
-            ],
-            autumn: [
-                { name: '🍂 Autumn Enchantment', description: 'Rich burgundy and gold with falling leaves, warm candles, and rustic charm.', gradient: 'linear-gradient(135deg, #d7ccc8, #bcaaa4)', icon: 'fa-leaf', colors: ['#8d6e63', '#d84315', '#ffab40', '#fff8e1', '#795548'], elements: ['Pumpkin Centerpieces', 'Velvet Draping', 'Autumn Leaf Garlands', 'Rustic Lanterns'] },
-                { name: '🍷 Vineyard Romance', description: 'Deep wine and plum tones with grape vine décor and vintage charm.', gradient: 'linear-gradient(135deg, #ce93d8, #ab47bc)', icon: 'fa-wine-glass', colors: ['#7b1fa2', '#e1bee7', '#f3e5f5', '#ffcc80', '#4a148c'], elements: ['Grape Vine Arches', 'Wine Barrel Tables', 'Purple Florals', 'Vintage Candelabras'] },
-            ],
-            winter: [
-                { name: '❄️ Winter Wonderland', description: 'Silver and white with crystal accents, snowflake motifs, and warm candlelight.', gradient: 'linear-gradient(135deg, #e3f2fd, #bbdefb)', icon: 'fa-snowflake', colors: ['#90caf9', '#ffffff', '#e8eaf6', '#b0bec5', '#cfd8dc'], elements: ['Crystal Chandeliers', 'Silver Candelabras', 'White Fur Runners', 'Snowflake Motifs'] },
-                { name: '🕯️ Cozy Firelight', description: 'Warm amber and burgundy with fireplace glow, velvet textures, and pine accents.', gradient: 'linear-gradient(135deg, #ffccbc, #ff8a65)', icon: 'fa-fire', colors: ['#ff7043', '#d32f2f', '#fff3e0', '#4e342e', '#ffab40'], elements: ['Faux Fireplace', 'Pine Garlands', 'Velvet Table Runners', 'Warm Candle Clusters'] },
-            ]
-        },
-        fun: {
-            spring: [
-                { name: '🎈 Pop of Color', description: 'Vibrant balloons, confetti stations, and rainbow-inspired décor for maximum fun!', gradient: 'linear-gradient(135deg, #f06292, #ba68c8)', icon: 'fa-face-laugh', colors: ['#e91e63', '#ff9800', '#4caf50', '#2196f3', '#9c27b0'], elements: ['Balloon Arches', 'Confetti Cannons', 'Photo Booth Props', 'Candy Bar'] },
-                { name: '🎪 Carnival Fiesta', description: 'Carnival-themed with striped tents, game booths, and cotton candy stations.', gradient: 'linear-gradient(135deg, #ffeb3b, #ff9800)', icon: 'fa-ticket', colors: ['#f44336', '#ffeb3b', '#ffffff', '#2196f3', '#4caf50'], elements: ['Striped Tent', 'Game Stalls', 'Popcorn Machine', 'Giant Lollipops'] },
-            ],
-            summer: [
-                { name: '🌈 Summer Splash', description: 'Neon colors, pool vibes, tropical fruits, and water elements.', gradient: 'linear-gradient(135deg, #00bcd4, #26c6da)', icon: 'fa-water', colors: ['#00bcd4', '#ff4081', '#ffeb3b', '#76ff03', '#ff6e40'], elements: ['Inflatable Decor', 'Neon Signs', 'Tropical Fruits', 'Splash Zones'] },
-                { name: '🍕 Food Festival', description: 'Food-themed décor with live cooking stations, food cart displays, and fun signage.', gradient: 'linear-gradient(135deg, #ff5722, #ff9800)', icon: 'fa-utensils', colors: ['#ff5722', '#ffeb3b', '#ffffff', '#8bc34a', '#795548'], elements: ['Food Cart Stations', 'Giant Menu Boards', 'Chef Hat Props', 'Chalkboard Signs'] },
-            ],
-            autumn: [
-                { name: '🎃 Harvest Festival', description: 'Pumpkins, hay bales, and warm autumn colors for a festive fall party.', gradient: 'linear-gradient(135deg, #ff9800, #f57f17)', icon: 'fa-pumpkin', colors: ['#ff9800', '#795548', '#ffeb3b', '#e65100', '#8d6e63'], elements: ['Pumpkin Displays', 'Hay Bale Seating', 'Apple Bobbing', 'Scarecrow Décor'] },
-                { name: '🎭 Masquerade Fun', description: 'Masked theme with dramatic lighting, mystery photo booth, and themed props.', gradient: 'linear-gradient(135deg, #212121, #424242)', icon: 'fa-masks-theater', colors: ['#212121', '#ffd700', '#c62828', '#ffffff', '#4a148c'], elements: ['Venetian Masks', 'Dramatic Draping', 'Gold Accents', 'Mystery Photo Booth'] },
-            ],
-            winter: [
-                { name: '🎄 Holiday Bash', description: 'Festive Christmas-inspired party with trees, lights, and gift exchanges.', gradient: 'linear-gradient(135deg, #c62828, #2e7d32)', icon: 'fa-tree', colors: ['#c62828', '#2e7d32', '#ffd700', '#ffffff', '#6d4c41'], elements: ['Christmas Tree', 'Gift Exchange', 'Hot Cocoa Bar', 'Snowman Props'] },
-                { name: '🎆 New Year Bash', description: 'Glitter, sparkle, and countdown clock for an epic New Year celebration!', gradient: 'linear-gradient(135deg, #212121, #ffd700)', icon: 'fa-champagne-glasses', colors: ['#000000', '#ffd700', '#c0c0c0', '#ffffff', '#1a237e'], elements: ['Giant Countdown Clock', 'Glitter Balloons', 'Confetti Drop', 'Sparkler Exit'] },
-            ]
-        },
-        elegant: {
-            spring: [
-                { name: '🦋 Butterfly Garden', description: 'Delicate butterflies, crystal accents, and pastel elegance in a garden setting.', gradient: 'linear-gradient(135deg, #e8eaf6, #c5cae9)', icon: 'fa-gem', colors: ['#7986cb', '#ce93d8', '#ffffff', '#b2dfdb', '#fff9c4'], elements: ['Butterfly Releases', 'Crystal Centerpieces', 'Pastel Florals', 'Silk Draping'] },
-                { name: '🕊️ White Elegance', description: 'All-white with varying textures, crystal chandeliers, and soft candlelight.', gradient: 'linear-gradient(135deg, #fafafa, #eeeeee)', icon: 'fa-dove', colors: ['#ffffff', '#f5f5f5', '#e0e0e0', '#c0c0c0', '#eeeeee'], elements: ['White Orchids', 'Crystal Chandeliers', 'Silk Runners', 'Pearl Accents'] },
-            ],
-            summer: [
-                { name: '🌺 Tropical Elegance', description: 'Lush tropical blooms with sophisticated gold accents and ambient lighting.', gradient: 'linear-gradient(135deg, #00695c, #004d40)', icon: 'fa-leaf', colors: ['#00695c', '#ffd700', '#ffffff', '#e65100', '#1b5e20'], elements: ['Tropical Orchids', 'Gold Vases', 'Green Velvet', 'Candle Walkways'] },
-                { name: '💎 Crystal Night', description: 'Sparkling crystals, mirrored surfaces, and sophisticated lighting design.', gradient: 'linear-gradient(135deg, #1a237e, #0d47a1)', icon: 'fa-gem', colors: ['#1a237e', '#c0c0c0', '#ffffff', '#64b5f6', '#e8eaf6'], elements: ['Crystal Curtains', 'Mirror Tables', 'Spotlighting', 'Diamond Motifs'] },
-            ],
-            autumn: [
-                { name: '🥂 Black Tie Affair', description: 'Sophisticated black and gold with tall centerpieces and dramatic lighting.', gradient: 'linear-gradient(135deg, #212121, #424242)', icon: 'fa-crown', colors: ['#212121', '#ffd700', '#ffffff', '#757575', '#e0e0e0'], elements: ['Tall Gold Centerpieces', 'Black Linen', 'Spotlights', 'Grand Entrance'] },
-                { name: '🍾 Champagne Toast', description: 'Champagne and blush tones with delicate florals and refined elegance.', gradient: 'linear-gradient(135deg, #d7ccc8, #efebe9)', icon: 'fa-champagne-glasses', colors: ['#d7ccc8', '#f48fb1', '#ffd700', '#ffffff', '#bcaaa4'], elements: ['Champagne Tower', 'Blush Roses', 'Gold Cutlery', 'Silk Napkins'] },
-            ],
-            winter: [
-                { name: '🏰 Royal Palace', description: 'Grand royal theme with rich velvets, crown motifs, and palace-worthy décor.', gradient: 'linear-gradient(135deg, #4a148c, #6a1b9a)', icon: 'fa-crown', colors: ['#4a148c', '#ffd700', '#ffffff', '#e1bee7', '#311b92'], elements: ['Royal Thrones', 'Velvet Draping', 'Crown Centerpieces', 'Grand Chandelier'] },
-                { name: '✨ Starlight Gala', description: 'Celestial theme with twinkling stars, deep navy, and silver accents.', gradient: 'linear-gradient(135deg, #0d1b2a, #1b2838)', icon: 'fa-star', colors: ['#0d1b2a', '#c0c0c0', '#ffd700', '#90caf9', '#1a237e'], elements: ['Star Ceiling', 'Silver Draping', 'Crescent Arches', 'Galaxy Projections'] },
-            ]
-        },
-        festive: {
-            spring: [
-                { name: '🪔 Holi Celebration', description: 'Vibrant colors, powder play zones, and Bollywood-style entertainment.', gradient: 'linear-gradient(135deg, #e91e63, #ff9800)', icon: 'fa-palette', colors: ['#e91e63', '#ff9800', '#4caf50', '#2196f3', '#ffeb3b'], elements: ['Color Play Zone', 'Flower Showers', 'Dhol Players', 'Gulal Balloons'] },
-                { name: '🌺 Spring Festival', description: 'Flower-filled celebration with garlands, rangoli, and traditional music.', gradient: 'linear-gradient(135deg, #ff6f00, #e65100)', icon: 'fa-drum', colors: ['#ff6f00', '#f44336', '#ffeb3b', '#4caf50', '#ffffff'], elements: ['Marigold Garlands', 'Rangoli Design', 'Traditional Music', 'Dance Stage'] },
-            ],
-            summer: [
-                { name: '🥁 Dhol Night', description: 'High-energy dhol beats, LED dance floor, and energetic Bollywood vibes.', gradient: 'linear-gradient(135deg, #f44336, #d32f2f)', icon: 'fa-drum', colors: ['#f44336', '#ffd700', '#ff9800', '#ffffff', '#4caf50'], elements: ['Dhol Players', 'LED Dance Floor', 'Bollywood Photo Booth', 'Neon Signs'] },
-                { name: '🎵 Music Festival', description: 'Concert-style setup with stage, sound, lights, and festival vibes.', gradient: 'linear-gradient(135deg, #6200ea, #304ffe)', icon: 'fa-music', colors: ['#6200ea', '#00e5ff', '#ff1744', '#ffea00', '#ffffff'], elements: ['Concert Stage', 'Light Show', 'VIP Lounge', 'Food Trucks'] },
-            ],
-            autumn: [
-                { name: '🪔 Diwali Spectacular', description: 'Grand Diwali celebration with diyas, lanterns, rangoli, and fireworks.', gradient: 'linear-gradient(135deg, #ff6f00, #bf360c)', icon: 'fa-fire', colors: ['#ff6f00', '#ffd700', '#d32f2f', '#ffffff', '#4e342e'], elements: ['1000 Diyas', 'Lantern Walkways', 'Grand Rangoli', 'Firecracker Display'] },
-                { name: '🎊 Navratri Garba', description: 'Traditional garba night with dandiya, chaniya choli, and vibrant décor.', gradient: 'linear-gradient(135deg, #e91e63, #c2185b)', icon: 'fa-music', colors: ['#e91e63', '#4caf50', '#ffeb3b', '#ff9800', '#ffffff'], elements: ['Garba Ground', 'Dandiya Sticks', 'Traditional Décor', 'Spinning Lights'] },
-            ],
-            winter: [
-                { name: '🎊 Grand Celebration', description: 'Majestic winter celebration with warm lights, traditional décor, and feast.', gradient: 'linear-gradient(135deg, #b71c1c, #880e4f)', icon: 'fa-champagne-glasses', colors: ['#b71c1c', '#ffd700', '#ffffff', '#4a148c', '#00695c'], elements: ['Grand Entrance Gate', 'Traditional Torans', 'Brass Décor', 'Live Music Stage'] },
-                { name: '🎇 Lohri Celebration', description: 'Bonfire, folk music, and traditional Punjabi celebration vibes.', gradient: 'linear-gradient(135deg, #ff5722, #e64a19)', icon: 'fa-fire', colors: ['#ff5722', '#ffeb3b', '#795548', '#ffffff', '#ff9800'], elements: ['Bonfire Setup', 'Folk Music', 'Dhol', 'Traditional Food Stalls'] },
-            ]
-        },
-        zen: {
-            spring: [
-                { name: '🧘 Zen Garden', description: 'Minimalist Japanese-inspired with bamboo, stones, and water features.', gradient: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)', icon: 'fa-spa', colors: ['#81c784', '#a1887f', '#ffffff', '#90a4ae', '#e8f5e9'], elements: ['Bamboo Screens', 'Stone Garden', 'Water Fountain', 'Bonsai Trees'] },
-                { name: '🌸 Sakura Serenity', description: 'Japanese cherry blossom inspired with soft pink, white, and natural elements.', gradient: 'linear-gradient(135deg, #fce4ec, #f8bbd0)', icon: 'fa-spa', colors: ['#f48fb1', '#ffffff', '#e8f5e9', '#bcaaa4', '#fce4ec'], elements: ['Sakura Branches', 'Paper Lanterns', 'Tatami Seating', 'Zen Stones'] },
-            ],
-            summer: [
-                { name: '🌿 Forest Retreat', description: 'Deep greens, natural wood, and ambient sounds for a peaceful escape.', gradient: 'linear-gradient(135deg, #1b5e20, #2e7d32)', icon: 'fa-tree', colors: ['#1b5e20', '#4caf50', '#795548', '#ffffff', '#a5d6a7'], elements: ['Natural Greenery', 'Wood Elements', 'Ambient Sounds', 'Candle Paths'] },
-                { name: '💧 Water Elements', description: 'Flowing water features, lotus ponds, and reflective surfaces.', gradient: 'linear-gradient(135deg, #0277bd, #01579b)', icon: 'fa-water', colors: ['#0277bd', '#ffffff', '#e1f5fe', '#81d4fa', '#b3e5fc'], elements: ['Water Curtain', 'Lotus Arrangements', 'Mirror Pool', 'Floating Candles'] },
-            ],
-            autumn: [
-                { name: '🍵 Tea Ceremony', description: 'Warm earth tones, ceramic accents, and intimate gathering setup.', gradient: 'linear-gradient(135deg, #5d4037, #4e342e)', icon: 'fa-mug-hot', colors: ['#5d4037', '#d7ccc8', '#ffffff', '#a1887f', '#efebe9'], elements: ['Tea Station', 'Ceramic Décor', 'Earth Tone Linens', 'Meditation Corner'] },
-                { name: '🌾 Harvest Calm', description: 'Natural grains, dried flowers, and warm ambient earth-tone celebration.', gradient: 'linear-gradient(135deg, #bf360c, #e65100)', icon: 'fa-wheat-awn', colors: ['#bf360c', '#d7ccc8', '#ffcc80', '#ffffff', '#8d6e63'], elements: ['Wheat Bundles', 'Dried Flower Arches', 'Linen Draping', 'Warm Candle Clusters'] },
-            ],
-            winter: [
-                { name: '🕯️ Candlelit Peace', description: 'Hundreds of candles, warm blankets, and peaceful winter ambiance.', gradient: 'linear-gradient(135deg, #3e2723, #4e342e)', icon: 'fa-fire', colors: ['#3e2723', '#ffab40', '#ffffff', '#d7ccc8', '#5d4037'], elements: ['Candle Clusters', 'Warm Blankets', 'Soft Music', 'Aromatherapy'] },
-                { name: '🏔️ Mountain Lodge', description: 'Cozy mountain lodge feeling with wood, stone, and warm lighting.', gradient: 'linear-gradient(135deg, #455a64, #37474f)', icon: 'fa-mountain', colors: ['#455a64', '#8d6e63', '#ffffff', '#ffab40', '#37474f'], elements: ['Log Furniture', 'Stone Accents', 'Plaid Textiles', 'Warm String Lights'] },
-            ]
-        }
-    };
-
-    const moodConcepts = conceptsDB[mood] || conceptsDB.romantic;
-    return moodConcepts[season] || moodConcepts.spring;
-}
-
 // ═══════════════════════════════════════════
 // AI CHATBOT
 // ═══════════════════════════════════════════
@@ -2510,22 +1871,9 @@ function initSmoothScroll() {
     });
 }
 
-function initScrollAnimations() {
-    // Keep all cards fully visible and interactive at all times
-    document.querySelectorAll('.feature-card, .glass-card, .vendor-card, .expense-card, .vd-stat-card, .theme-concept-card, .cat-module-card').forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'none';
-        el.style.visibility = 'visible';
-    });
-}
-
 // ═══════════════════════════════════════════
 // UTILITIES
 // ═══════════════════════════════════════════
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function showToast(message, type = 'info') {
     let container = document.querySelector('.toast-container');
     if (!container) {

@@ -183,6 +183,7 @@ const MIME_TYPES = {
     '.html': 'text/html; charset=UTF-8',
     '.css': 'text/css; charset=UTF-8',
     '.js': 'application/javascript; charset=UTF-8',
+    '.mjs': 'application/javascript; charset=UTF-8',
     '.json': 'application/json; charset=UTF-8',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
@@ -357,7 +358,7 @@ async function handleRequest(req, res) {
     }
 
     // Serve only intentional public assets, never source/configuration/secrets.
-    const publicFiles = new Set(['/index.html', '/app.js', '/styles.css', '/planning.js', '/event-data.js', '/vendor/qrcode.js']);
+    const publicFiles = new Set(['/index.html', '/app.js', '/styles.css', '/planning.js', '/event-data.js', '/vendor/qrcode.js', '/features/venue.mjs', '/features/themes.mjs', '/features/vendor-dashboard.mjs']);
     const assetPath = pathname === '/' ? '/index.html' : pathname;
     if (!['GET', 'HEAD'].includes(req.method)) {
         res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return;
