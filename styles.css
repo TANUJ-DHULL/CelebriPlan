@@ -24,16 +24,16 @@
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%);
-    --gradient-hero: linear-gradient(135deg, #0f0c29 0%, #1a0a3e 40%, #24243e 100%);
+    --gradient-hero: linear-gradient(#000000, #000000);
     --gradient-card: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(219, 39, 119, 0.05) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
 
     /* Dark theme (default) */
-    --bg-primary: #0a0a1a;
-    --bg-secondary: #111127;
-    --bg-tertiary: #1a1a3e;
-    --bg-card: rgba(26, 26, 62, 0.6);
-    --bg-card-hover: rgba(40, 40, 80, 0.8);
+    --bg-primary: #000000;
+    --bg-secondary: #0b0b0b;
+    --bg-tertiary: #171717;
+    --bg-card: rgba(23, 23, 23, 0.8);
+    --bg-card-hover: rgba(38, 38, 38, 0.9);
 
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
@@ -389,7 +389,7 @@ section {
 }
 
 .navbar.scrolled {
-    background: rgba(10, 10, 26, 0.85);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-sm);
