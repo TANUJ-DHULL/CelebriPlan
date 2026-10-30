@@ -4043,7 +4043,7 @@ section {
 
 /* ─── Breadcrumb Navigation Bar ─── */
 .page-breadcrumb-bar {
-    background: rgba(17, 17, 39, 0.95);
+    background: var(--bg-secondary);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-color);
     padding: 0.85rem 0;
