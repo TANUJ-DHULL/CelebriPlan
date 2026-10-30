@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initChatbot();
     initThemeToggle();
     initSmoothScroll();
+    initFooterLinks();
     initScrollAnimations();
     // Run initial budget calculation
     calculateBudget();
@@ -2291,6 +2292,15 @@ function initThemeToggle() {
 // ═══════════════════════════════════════════
 // SMOOTH SCROLL & ANIMATIONS
 // ═══════════════════════════════════════════
+function initFooterLinks() {
+    document.querySelectorAll('.footer [data-coming-soon]').forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
+            showToast('We will be right back 🫠', 'info');
+        });
+    });
+}
+
 function initSmoothScroll() {
     // Only smooth-scroll to anchors that are within the current active page
     document.querySelectorAll('a[href^="#"]:not([href="#"]):not([href^="#/"])').forEach(link => {
