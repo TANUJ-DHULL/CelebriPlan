@@ -2,3 +2,9 @@ node_modules/
 .DS_Store
 *.log
 .env
+
+.vercel
+.env*
+test-results/
+playwright-report/
+coverage/

@@ -4,7 +4,11 @@
   "description": "CelebriPlan — Full-Stack AI Celebration & Event Planner Platform",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "node --test tests/*.test.cjs",
+    "test:e2e": "playwright test",
+    "test:coverage": "node --experimental-test-coverage --test tests/*.test.cjs",
+    "vendor:sync": "node scripts/sync-vendor.cjs"
   },
   "keywords": [
     "ai-event-planner",
@@ -14,5 +18,13 @@
     "budget-calculator"
   ],
   "author": "CelebriPlan Founders",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "jsqr": "^1.4.0"
+  },
+  "dependencies": {
+    "qrcode-generator": "^2.0.4"
+  }
 }

@@ -9,7 +9,9 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+const { randomUUID } = require('crypto');
+const { RequestError, text, number, validatePlan, readJSONBody, escapeICS, headers: securityHeaders } = require('./security');
+const { allocateBudget } = require('./planning');
 
 const PORT = process.env.PORT || 3000;
 
@@ -26,9 +28,7 @@ const vendorsDB = [
     { id: 9, name: 'Bass Beats DJ Sound', category: 'dj', city: 'Mumbai', rating: 4.3, reviews: 124, priceMin: 12000, priceMax: 60000, priceDisplay: '₹12,000 - ₹60,000', badge: 'verified', capacity: 'Up to 800 guests', services: ['P3 LED Video Wall', 'Digital Sound Console', 'Wireless Microphones', 'Fog & Bubble Machines'], description: 'Audio-visual powerhouses specializing in corporate galas and college festivals.' }
 ];
 
-// In-memory bookings and guests
-const bookingsDB = [];
-const guestsDB = [];
+// API receipts are not retained in process memory; durable bookings require a database.
 
 // ─── Section 9 AI Event Planning Engine ───
 function runAIEngine(input) {
@@ -67,15 +67,7 @@ function runAIEngine(input) {
         ratios = { venue: 0.28, food: 0.32, decoration: 0.16, photography: 0.12, other: 0.12 };
     }
 
-    // Allocate budget
-    const budget = {
-        venue: Math.round(budgetInRupees * ratios.venue),
-        food: Math.round(budgetInRupees * ratios.food),
-        decoration: Math.round(budgetInRupees * ratios.decoration),
-        photography: Math.round(budgetInRupees * ratios.photography),
-        other: 0
-    };
-    budget.other = budgetInRupees - (budget.venue + budget.food + budget.decoration + budget.photography);
+    const budget = allocateBudget(budgetInRupees, ratios);
 
     // Tasks
     let tasks;
@@ -111,7 +103,6 @@ function runAIEngine(input) {
 
     // Timeline based on durationHours
     const timeline = [];
-    const baseHour = 18; // 18:00 (6:00 PM)
 
     if (type === 'birthday') {
         timeline.push({ start: "18:00", activity: "Guest arrival" });
@@ -163,42 +154,15 @@ function generateICS(events) {
         ics.push(`DTSTAMP:${dtstamp}`);
         ics.push(`DTSTART:${start}`);
         ics.push(`DTEND:${end}`);
-        ics.push(`SUMMARY:${ev.title || 'CelebriPlan Event Task'}`);
-        ics.push(`DESCRIPTION:${(ev.description || 'Task scheduled via CelebriPlan AI Planner').replace(/\n/g, '\\n')}`);
-        ics.push(`LOCATION:${ev.location || 'Celebration Venue'}`);
+        ics.push(`SUMMARY:${escapeICS(ev.title || 'CelebriPlan Event Task')}`);
+        ics.push(`DESCRIPTION:${escapeICS(ev.description || 'Task scheduled via CelebriPlan AI Planner')}`);
+        ics.push(`LOCATION:${escapeICS(ev.location || 'Celebration Venue')}`);
         ics.push('STATUS:CONFIRMED');
         ics.push('END:VEVENT');
     });
 
     ics.push('END:VCALENDAR');
     return ics.join('\r\n');
-}
-
-// ─── Request Body Helper ───
-function readJSONBody(req) {
-    if (req.body) {
-        if (typeof req.body === 'object') return Promise.resolve(req.body);
-        try {
-            return Promise.resolve(JSON.parse(req.body));
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-            if (body.length > 1e6) req.destroy(); // 1MB limit
-        });
-        req.on('end', () => {
-            try {
-                resolve(body ? JSON.parse(body) : {});
-            } catch (err) {
-                reject(err);
-            }
-        });
-        req.on('error', reject);
-    });
 }
 
 // ─── MIME Types Map ───
@@ -216,8 +180,16 @@ const MIME_TYPES = {
 
 // ─── HTTP Server & Request Handler ───
 async function handleRequest(req, res) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    for (const [name, value] of Object.entries(securityHeaders)) res.setHeader(name, value);
+    res.setHeader('Cache-Control', 'no-store');
+    const origin = req.headers.origin;
+    const allowedOrigins = new Set(['https://celebri-plan.vercel.app', 'http://localhost:3000', 'http://127.0.0.1:3000']);
+    if ((origin && !allowedOrigins.has(origin)) || req.headers['sec-fetch-site'] === 'cross-site') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Origin is not allowed' }));
+        return;
+    }
+    if (origin) { res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Vary', 'Origin'); }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -227,7 +199,8 @@ async function handleRequest(req, res) {
         return;
     }
 
-    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    let parsedUrl;
+    try { parsedUrl = new URL(req.url, 'http://localhost'); } catch { res.writeHead(400); res.end('Invalid URL'); return; }
     const pathname = parsedUrl.pathname;
     const pathNormalized = pathname.replace(/^\/api/, '');
 
@@ -235,12 +208,12 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && (pathname === '/api/ai/plan' || pathNormalized === '/ai/plan')) {
         try {
             const input = await readJSONBody(req);
-            const planOutput = runAIEngine(input);
+            const planOutput = runAIEngine(validatePlan(input));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(planOutput, null, 2));
         } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Invalid JSON request payload', details: err.message }));
+            res.writeHead(err.status || 400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
         }
         return;
     }
@@ -267,12 +240,13 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && (pathname === '/api/vendors/compare' || pathNormalized === '/vendors/compare')) {
         try {
             const { ids } = await readJSONBody(req);
-            const idList = Array.isArray(ids) ? ids.map(Number) : [];
+            if (!Array.isArray(ids) || ids.length < 1 || ids.length > 4) throw new RequestError('Provide between 1 and 4 vendor IDs');
+            const idList = [...new Set(ids.map(id => number(id, 'vendor ID', 1, 9)))];
             const vendors = vendorsDB.filter(v => idList.includes(v.id));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ vendors, count: vendors.length }, null, 2));
         } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.writeHead(err.status || 400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: err.message }));
         }
         return;
@@ -282,15 +256,19 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && (pathname === '/api/vendors/book' || pathNormalized === '/vendors/book')) {
         try {
             const booking = await readJSONBody(req);
-            booking.id = 'BK-' + Date.now().toString(36).toUpperCase();
-            booking.status = 'confirmed';
+            const vendorId = number(booking.vendorId, 'vendorId', 1, 9);
+            const name = text(booking.name, 'name');
+            const guests = number(booking.guests, 'guests', 1, 10000);
+            const receipt = { id: randomUUID(), vendorId, name, guests, status: 'request-received' };
+            booking.id = receipt.id;
+            booking.status = receipt.status;
             booking.createdAt = new Date().toISOString();
-            bookingsDB.push(booking);
+
 
             res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, booking }, null, 2));
+            res.end(JSON.stringify({ success: true, booking: receipt, notice: 'Demo receipt only. Contact the vendor to confirm availability; no reservation or payment has been made.' }));
         } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.writeHead(err.status || 400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: err.message }));
         }
         return;
@@ -300,14 +278,17 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && (pathname === '/api/guests/rsvp' || pathNormalized === '/guests/rsvp')) {
         try {
             const rsvp = await readJSONBody(req);
-            rsvp.id = Date.now();
+            const name = text(rsvp.name, 'name');
+            if (!['accepted', 'declined', 'maybe', 'pending'].includes(rsvp.status)) throw new RequestError('Invalid RSVP status');
+            const response = { name, status: rsvp.status, id: randomUUID() };
+            rsvp.id = response.id;
             rsvp.timestamp = new Date().toISOString();
-            guestsDB.push(rsvp);
+
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, rsvp, totalGuests: guestsDB.length }, null, 2));
+            res.end(JSON.stringify({ success: true, rsvp: response, notice: 'Demo response only; not stored on the server.' }));
         } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.writeHead(err.status || 400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: err.message }));
         }
         return;
@@ -338,16 +319,14 @@ async function handleRequest(req, res) {
         return;
     }
 
-    // ── Static Files Serving (Local standalone server) ──
-    let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-    filePath = path.normalize(filePath);
-
-    // Security check
-    if (!filePath.startsWith(__dirname)) {
-        res.writeHead(403);
-        res.end('Access Denied');
-        return;
+    // Serve only intentional public assets, never source/configuration/secrets.
+    const publicFiles = new Set(['/index.html', '/app.js', '/styles.css', '/planning.js', '/vendor/qrcode.js']);
+    const assetPath = pathname === '/' ? '/index.html' : pathname;
+    if (!['GET', 'HEAD'].includes(req.method)) {
+        res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return;
     }
+    if (!publicFiles.has(assetPath)) { res.writeHead(404); res.end('Not Found'); return; }
+    const filePath = path.join(__dirname, assetPath);
 
     fs.stat(filePath, (err, stats) => {
         if (err || !stats.isFile()) {
@@ -359,7 +338,8 @@ async function handleRequest(req, res) {
         const ext = path.extname(filePath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-        res.writeHead(200, { 'Content-Type': contentType });
+        res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': assetPath.endsWith('.html') ? 'no-cache' : 'public, max-age=3600' });
+        if (req.method === 'HEAD') { res.end(); return; }
         const stream = fs.createReadStream(filePath);
         stream.on('error', () => {
             if (!res.headersSent) res.writeHead(500);

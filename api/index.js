@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
         if (!res.headersSent) {
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Function execution error', message: err.message }));
+            res.end(JSON.stringify({ error: 'Unable to process request' }));
         }
     }
 };

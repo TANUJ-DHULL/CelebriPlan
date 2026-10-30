@@ -1,74 +1,49 @@
-# 🎉 CelebriPlan — AI-Powered Celebration & Event Planner
+# CelebriPlan
 
-> Full-Stack Startup Blueprint | AI Event Planning Engine + Vendor Marketplace + 3D Venue Preview + Smart Invitations & RSVP + Google Calendar Automatic Scheduling
+A celebration and event planning prototype built with HTML, CSS and JavaScript, plus a Node.js HTTP API. Production: https://celebri-plan.vercel.app/
 
----
+## Run locally
 
-## 🌟 Live Local Hosting
-The backend server is currently running:
-- **Local URL:** [http://localhost:3000](http://localhost:3000)
-- **AI Planning API:** `POST http://localhost:3000/api/ai/plan`
-- **Vendor Marketplace API:** `GET http://localhost:3000/api/vendors`
-- **Calendar Sync (.ICS):** `GET http://localhost:3000/api/calendar/export`
+Requires Node.js 24 or later.
 
-To start the server anytime:
-```bash
-node server.js
+```sh
+npm ci
+npm start
 ```
 
----
+Open http://localhost:3000. Set PORT to use another port. No API key is required: planning and chatbot suggestions use deterministic rules and templates, not a generative AI service.
 
-## 🚀 How to Host Online (Free Cloud Deployment Options)
+## Validate changes
 
-### Option 1: Vercel (Recommended - 1 Command)
-1. Open your terminal in this folder:
-   ```bash
-   npx vercel
-   ```
-2. Follow the 3 prompts (Login with GitHub / Email).
-3. Your website will be live in 30 seconds with a free `.vercel.app` URL and automatic HTTPS!
+```sh
+npm test
+npm run test:coverage
+npm run test:e2e
+npm audit
+```
 
----
+Browser tests use installed Microsoft Edge on Windows. On Linux/macOS, run `npx playwright install chromium` first. They run an isolated server on port 3100. GitHub Actions installs Chromium and runs API/unit and browser tests on every push and pull request.
 
-### Option 2: Netlify (Drag & Drop or CLI)
-- **Method A (Drag & Drop):**
-  1. Visit [https://app.netlify.com/drop](https://app.netlify.com/drop).
-  2. Drag and drop the `C:\Event Page` folder into the browser.
-  3. Done! Your site is hosted instantly.
-- **Method B (Terminal):**
-  ```bash
-  npx netlify deploy --prod
-  ```
+The suite checks budget conservation and rounding, malformed and oversized requests, origin restrictions, static file isolation, planner/dashboard workflows, malicious text rendering, navigation, keyboard dialogs, invitation PNG downloads, QR decoding, and automated WCAG A/AA checks across all 11 routes. Automated accessibility checks supplement manual testing; they do not prove full conformance.
 
----
+## Implementation
 
-### Option 3: GitHub Pages
-1. Create a new repository on [GitHub](https://github.com/new) named `celebriplan`.
-2. Push this project:
-   ```bash
-   git init
-   git add .
-   git commit -m "Launch CelebriPlan"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/celebriplan.git
-   git push -u origin main
-   ```
-3. In your GitHub repo, go to **Settings > Pages**, select the `main` branch, and click **Save**.
-4. Your site will be published at `https://YOUR_USERNAME.github.io/celebriplan/`.
+- planning.js: shared integer budget allocation for browser and API, without negative rounding remainders.
+- security.js: request limits, input validation, response headers and calendar escaping.
+- server.js: public asset allowlist and validated planning/vendor/calendar endpoints.
+- api/index.js: Vercel serverless adapter. Explicit static/API routes in vercel.json prevent browser code from being treated as a server entrypoint.
+- vendor/qrcode.js: local MIT-licensed QR encoder; run `npm run vendor:sync` after upgrading the package.
 
----
+Planner generation has no artificial wait. The venue canvas initializes only when visited, pauses on other routes/hidden tabs, and respects reduced motion. PDF export uses the browser print/save dialog; invitation cards download as PNGs; copy actions report success only after the clipboard operation succeeds.
 
-### Option 4: Render / Railway (Full-Stack Node.js Hosting)
-1. Push to GitHub as shown in Option 3.
-2. Sign in to [Render](https://render.com) or [Railway](https://railway.app).
-3. Select **New Web Service** and connect your GitHub repository.
-4. Set Build Command to empty and Start Command to `node server.js`.
-5. Your full-stack Node.js server and API will be live 24/7!
+## Current product boundaries
 
----
+Guests, tasks, RSVP responses and expenses live in the current browser session and reset on reload. Vendor records are sample data, not a live marketplace. Booking and quotation flows do not contact vendors, reserve venues, process payments or send email. The API returns validated demo receipts and does not retain personal information. The UI describes these limitations instead of claiming a confirmed reservation or sent message.
 
-## 🛠️ Tech Stack
-- **Frontend:** HTML5, CSS3, JavaScript (Vanilla ES6+), Three.js / Canvas 3D Viewer
-- **Backend:** Node.js HTTP Server, REST APIs
-- **AI Planning Engine:** Section 9 Structured Event Planning Engine (`budgetPaise`, `tasks`, `timeline`)
-- **Integrations:** Google Calendar Web API, WhatsApp Cloud URL Scheme, Dynamic QR Generation
+Calendar links open an editable Google Calendar event. ICS downloads support manual import; there is no OAuth-based automatic synchronization. QR passes encode details; they are not cryptographically signed admission credentials. A shared database, authentication, authorization and real service integrations are required before real bookings or attendee records.
+
+## Security and deployment
+
+The server exposes only explicitly listed frontend assets. Source, repository metadata, environment files and tests are not served. Requests require bounded JSON objects and validated fields; unsupported cross-site origins are rejected. User-controlled text is escaped before entering HTML, and calendar fields use iCalendar escaping. Response headers restrict framing, sniffing and browser permissions. CSP still permits inline handlers/styles used by the existing interface; migrating those to external listeners would allow a stricter policy.
+
+Deploy committed source with `vercel deploy --prod`. Keep .env files, .vercel, node_modules, test reports and coverage out of Git. Frontend JavaScript is publicly downloadable by design; a public repository also exposes source history. These are not encrypted assets.

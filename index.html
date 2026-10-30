@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <!-- ═══════════════════════════════════════════ -->
     <!-- NAVIGATION BAR -->
     <!-- ═══════════════════════════════════════════ -->
@@ -42,7 +43,7 @@
                 </button>
                 <button class="btn btn-primary nav-cta" id="nav-get-started" onclick="navigateToPage('ai-planner')">Start Planning</button>
             </div>
-            <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle Navigation">
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle Navigation" aria-controls="nav-links" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
         </div>
@@ -65,7 +66,7 @@
                         <span class="chatbot-status">● Online</span>
                     </div>
                 </div>
-                <button class="chatbot-close" id="chatbot-close"><i class="fas fa-times"></i></button>
+                <button class="chatbot-close" aria-label="Close planning assistant" id="chatbot-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chat-message bot">
@@ -82,8 +83,8 @@
                 <button class="suggestion-chip" data-msg="Plan a college fest for 500 students with ₹1,00,000 budget">🎓 College Fest</button>
             </div>
             <div class="chatbot-input-area">
-                <input type="text" id="chatbot-input" placeholder="Describe your event..." autocomplete="off">
-                <button class="chatbot-send" id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+                <input type="text" aria-label="Message the planning assistant" id="chatbot-input" placeholder="Describe your event..." autocomplete="off">
+                <button class="chatbot-send" aria-label="Send message" id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -578,7 +579,7 @@
                     <div class="budget-chart-card glass-card">
                         <h3><i class="fas fa-chart-pie"></i> Budget Breakdown</h3>
                         <div class="budget-chart-container">
-                            <canvas id="budget-chart" width="300" height="300"></canvas>
+                            <canvas role="img" aria-label="Event budget allocation chart; category amounts are listed below" id="budget-chart" width="300" height="300"></canvas>
                             <div class="budget-total-overlay" id="budget-total-overlay">
                                 <span class="total-label">Total</span>
                                 <span class="total-value" id="budget-total-value">₹50,000</span>
@@ -667,7 +668,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <div class="modal-overlay" id="vendor-modal">
         <div class="modal-content glass-card">
-            <button class="modal-close" id="vendor-modal-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="vendor-modal-close"><i class="fas fa-times"></i></button>
             <div id="vendor-modal-body">
                 <!-- Populated by JS -->
             </div>
@@ -896,7 +897,7 @@
                 </div>
                 <div class="venue-preview-container glass-card">
                     <div class="venue-3d-viewer" id="venue-3d-viewer">
-                        <canvas id="venue-canvas" width="800" height="500"></canvas>
+                        <canvas role="img" aria-label="Interactive preview of the selected event venue" id="venue-canvas" width="800" height="500"></canvas>
                         <div class="venue-3d-overlay">
                             <div class="venue-info-badge" id="venue-info-badge">
                                 <span class="venue-name">Banquet Hall</span>
@@ -998,12 +999,12 @@
                         <table class="guest-table" id="guest-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Group</th>
-                                    <th>RSVP</th>
-                                    <th>Table</th>
-                                    <th>Check-in</th>
-                                    <th>Actions</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Group</th>
+                                    <th scope="col">RSVP</th>
+                                    <th scope="col">Table</th>
+                                    <th scope="col">Check-in</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="guest-table-body">
@@ -1123,7 +1124,7 @@
                     </div>
                     <div class="expense-list glass-card">
                         <h3><i class="fas fa-list"></i> Recent Expenses</h3>
-                        <div class="expense-items" id="expense-items">
+                        <div class="expense-items" id="expense-items" tabindex="0" role="region" aria-label="Expense list">
                             <!-- Populated by JS -->
                         </div>
                     </div>
@@ -1229,7 +1230,7 @@
                     </div>
                     <div class="dash-card glass-card notifications-card">
                         <h3><i class="fas fa-bell"></i> Recent Activity</h3>
-                        <div class="notifications-list" id="notifications-list">
+                        <div class="notifications-list" id="notifications-list" tabindex="0" role="region" aria-label="Event notifications">
                             <!-- Populated by JS -->
                         </div>
                     </div>
@@ -1434,7 +1435,7 @@
     <!-- Vendor Compare Modal -->
     <div class="modal-overlay" id="vendor-compare-modal">
         <div class="modal-content glass-card modal-lg">
-            <button class="modal-close" id="vendor-compare-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="vendor-compare-close"><i class="fas fa-times"></i></button>
             <div class="modal-header-block">
                 <h3><i class="fas fa-code-compare"></i> Compare Selected Vendors</h3>
                 <p>Side-by-side analysis of pricing, rating, capacity, and included services.</p>
@@ -1448,7 +1449,7 @@
     <!-- Vendor Booking Modal -->
     <div class="modal-overlay" id="vendor-booking-modal">
         <div class="modal-content glass-card modal-md">
-            <button class="modal-close" id="vendor-booking-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="vendor-booking-close"><i class="fas fa-times"></i></button>
             <div class="modal-header-block">
                 <h3 id="booking-modal-title"><i class="fas fa-calendar-check"></i> Book Vendor</h3>
                 <p id="booking-modal-subtitle">Reserve services with instant booking confirmation</p>
@@ -1457,26 +1458,26 @@
                 <input type="hidden" id="booking-vendor-id">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Your Full Name</label>
+                        <label for="booking-user-name">Your Full Name</label>
                         <input type="text" id="booking-user-name" placeholder="e.g., Tanuj Kumar" required>
                     </div>
                     <div class="form-group">
-                        <label>Phone Number</label>
+                        <label for="booking-user-phone">Phone Number</label>
                         <input type="tel" id="booking-user-phone" placeholder="e.g., 9876543210" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Event Date</label>
+                        <label for="booking-event-date">Event Date</label>
                         <input type="date" id="booking-event-date" required>
                     </div>
                     <div class="form-group">
-                        <label>Expected Guests</label>
+                        <label for="booking-guest-count">Expected Guests</label>
                         <input type="number" id="booking-guest-count" placeholder="50" min="1" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Selected Package / Service</label>
+                    <label for="booking-service-select">Selected Package / Service</label>
                     <select id="booking-service-select">
                         <option value="standard">Standard Full-Service Package</option>
                         <option value="premium">Premium VIP Package (+20%)</option>
@@ -1484,7 +1485,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Special Requests / Instructions</label>
+                    <label for="booking-notes">Special Requests / Instructions</label>
                     <textarea id="booking-notes" rows="2" placeholder="Dietary instructions, stage dimensions, song preferences..."></textarea>
                 </div>
                 <div class="booking-summary-box">
@@ -1501,7 +1502,7 @@
     <!-- Vendor Quote Modal -->
     <div class="modal-overlay" id="vendor-quote-modal">
         <div class="modal-content glass-card modal-md">
-            <button class="modal-close" id="vendor-quote-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="vendor-quote-close"><i class="fas fa-times"></i></button>
             <div class="modal-header-block">
                 <h3 id="quote-modal-title"><i class="fas fa-file-invoice"></i> Request Instant Quote</h3>
                 <p id="quote-modal-subtitle">Get custom itemized pricing directly from vendor</p>
@@ -1510,21 +1511,21 @@
                 <input type="hidden" id="quote-vendor-id">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Contact Name</label>
+                        <label for="quote-name">Contact Name</label>
                         <input type="text" id="quote-name" placeholder="Your name" required>
                     </div>
                     <div class="form-group">
-                        <label>Email / WhatsApp</label>
+                        <label for="quote-contact">Email / WhatsApp</label>
                         <input type="text" id="quote-contact" placeholder="Email or 10-digit mobile" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Estimated Budget (₹)</label>
+                        <label for="quote-budget">Estimated Budget (₹)</label>
                         <input type="number" id="quote-budget" placeholder="e.g., 40000">
                     </div>
                     <div class="form-group">
-                        <label>Event Type</label>
+                        <label for="quote-event-type">Event Type</label>
                         <select id="quote-event-type">
                             <option value="birthday">Birthday Party</option>
                             <option value="wedding">Wedding</option>
@@ -1534,7 +1535,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Required Services & Notes</label>
+                    <label for="quote-requirements">Required Services & Notes</label>
                     <textarea id="quote-requirements" rows="3" placeholder="Describe the specific services you need..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg btn-full">
@@ -1547,7 +1548,7 @@
     <!-- Interactive RSVP Response Modal -->
     <div class="modal-overlay" id="rsvp-modal">
         <div class="modal-content glass-card modal-sm">
-            <button class="modal-close" id="rsvp-modal-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="rsvp-modal-close"><i class="fas fa-times"></i></button>
             <div class="modal-header-block text-center">
                 <div class="rsvp-header-icon" id="rsvp-modal-icon"><i class="fas fa-envelope-open-text"></i></div>
                 <h3 id="rsvp-modal-title">RSVP for Celebration</h3>
@@ -1556,20 +1557,20 @@
             <form id="interactive-rsvp-form">
                 <input type="hidden" id="rsvp-status-input" value="accepted">
                 <div class="form-group">
-                    <label>Your Name</label>
+                    <label for="rsvp-guest-name">Your Name</label>
                     <input type="text" id="rsvp-guest-name" placeholder="e.g., Vikram Sharma" required>
                 </div>
                 <div class="form-group">
-                    <label>WhatsApp / Mobile Number</label>
+                    <label for="rsvp-guest-phone">WhatsApp / Mobile Number</label>
                     <input type="tel" id="rsvp-guest-phone" placeholder="e.g., 9876543210" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Total Attendees</label>
+                        <label for="rsvp-guest-count">Total Attendees</label>
                         <input type="number" id="rsvp-guest-count" value="1" min="1" max="10" required>
                     </div>
                     <div class="form-group">
-                        <label>Food Choice</label>
+                        <label for="rsvp-meal-preference">Food Choice</label>
                         <select id="rsvp-meal-preference">
                             <option value="veg">🥗 Vegetarian</option>
                             <option value="nonveg">🍗 Non-Vegetarian</option>
@@ -1587,7 +1588,7 @@
     <!-- Digital QR Entry Pass Modal -->
     <div class="modal-overlay" id="qr-pass-modal">
         <div class="modal-content glass-card modal-sm text-center">
-            <button class="modal-close" id="qr-pass-modal-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="qr-pass-modal-close"><i class="fas fa-times"></i></button>
             <div class="entry-pass-card" id="printable-entry-pass">
                 <div class="pass-brand">
                     <i class="fas fa-sparkles"></i> CelebriPlan Digital Entry Pass
@@ -1616,16 +1617,16 @@
 
     <div class="modal-overlay" id="task-modal">
         <div class="modal-content glass-card modal-sm">
-            <button class="modal-close" id="task-modal-close"><i class="fas fa-times"></i></button>
+            <button class="modal-close" aria-label="Close dialog" id="task-modal-close"><i class="fas fa-times"></i></button>
             <h3><i class="fas fa-plus-circle"></i> Add New Task</h3>
             <form id="add-task-form">
                 <div class="form-group">
-                    <label>Task Title</label>
+                    <label for="task-title">Task Title</label>
                     <input type="text" id="task-title" placeholder="e.g., Confirm venue booking" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Priority</label>
+                        <label for="task-priority">Priority</label>
                         <select id="task-priority">
                             <option value="high">🔴 High</option>
                             <option value="medium" selected>🟡 Medium</option>
@@ -1633,12 +1634,12 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Due Date</label>
+                        <label for="task-due">Due Date</label>
                         <input type="date" id="task-due">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Assign To</label>
+                    <label for="task-assignee">Assign To</label>
                     <input type="text" id="task-assignee" placeholder="e.g., Event Coordinator">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-plus"></i> Add Task</button>
@@ -1646,6 +1647,8 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="vendor/qrcode.js" defer></script>
+    <script src="planning.js" defer></script>
+    <script src="app.js" defer></script>
 </body>
 </html>

@@ -4,6 +4,10 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // ─── State Management ───
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
 const AppState = {
     guests: [],
     expenses: [],
@@ -29,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initVendorModals();
     initInvitations();
     initInteractiveRSVP();
-    init3DVenuePreview();
     initGuestManagement();
     initExpenseTracker();
     initDashboard();
@@ -40,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initSmoothScroll();
     initFooterLinks();
+    initAccessibility();
     initScrollAnimations();
     // Run initial budget calculation
     calculateBudget();
@@ -79,6 +83,18 @@ function navigateToPage(pageName) {
             link.classList.add('active');
         }
     });
+
+    document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+        if (link.dataset.page === pageName) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+    });
+    if (window.stopVenueAnimation) window.stopVenueAnimation();
+    if (pageName === 'venue-3d') {
+        if (!window.redrawVenue3D) init3DVenuePreview();
+        if (window.startVenueAnimation) window.startVenueAnimation();
+    }
+    const heading = targetPage?.querySelector('h1, h2');
+    if (heading) { heading.tabIndex = -1; heading.focus({preventScroll:true}); }
 
     // 3. Update browser history/URL hash cleanly
     const targetHash = pageName === 'home' ? '' : `#/${pageName}`;
@@ -175,6 +191,7 @@ function initNavbar() {
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
+            hamburger.setAttribute('aria-expanded', String(navLinks.classList.contains('active')));
         });
 
         // Close nav on link click
@@ -182,6 +199,7 @@ function initNavbar() {
             link.addEventListener('click', () => {
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
+                hamburger.setAttribute('aria-expanded', 'false');
                 const page = link.dataset.page;
                 if (page) {
                     navigateToPage(page);
@@ -206,11 +224,11 @@ function initNavbar() {
 // ═══════════════════════════════════════════
 function initHeroParticles() {
     const container = document.getElementById('hero-particles');
-    if (!container) return;
+    if (!container || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const colors = ['#7c3aed', '#db2777', '#f59e0b', '#3b82f6', '#10b981'];
 
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 12; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         const size = Math.random() * 6 + 2;
@@ -333,13 +351,7 @@ const AIPlanner = {
         const { type, city, guests, budget, duration, theme, food, notes } = input;
         const config = this.eventConfigs[type] || this.eventConfigs['birthday'];
 
-        // Budget allocation
-        const budgetAllocation = {};
-        let totalAllocated = 0;
-        for (const [category, ratio] of Object.entries(config.budgetSplit)) {
-            budgetAllocation[category] = Math.round(budget * ratio);
-            totalAllocated += budgetAllocation[category];
-        }
+        const budgetAllocation = CelebrationPlanning.allocateBudget(budget, config.budgetSplit);
 
         // Per person food cost
         const foodCostPerPerson = config.foodPerPerson[food] || config.foodPerPerson['both'];
@@ -490,14 +502,7 @@ const AIPlanner = {
             ratios = { venue: 0.28, food: 0.32, decoration: 0.16, photography: 0.12, other: 0.12 };
         }
 
-        const budget = {
-            venue: Math.round(budgetInRupees * ratios.venue),
-            food: Math.round(budgetInRupees * ratios.food),
-            decoration: Math.round(budgetInRupees * ratios.decoration),
-            photography: Math.round(budgetInRupees * ratios.photography),
-            other: 0
-        };
-        budget.other = budgetInRupees - (budget.venue + budget.food + budget.decoration + budget.photography);
+        const budget = CelebrationPlanning.allocateBudget(budgetInRupees, ratios);
 
         let tasks;
         if (type === 'birthday') {
@@ -580,7 +585,7 @@ function initAIPlannerForm() {
             notes: document.getElementById('event-notes').value
         };
 
-        if (!input.type || !input.city || !input.guests || !input.budget) {
+        if (!input.type || !input.city.trim() || input.city.length > 120 || !Number.isSafeInteger(input.guests) || input.guests < 1 || input.guests > 10000 || !Number.isSafeInteger(input.budget) || input.budget < 1 || input.budget > 100000000 || !Number.isSafeInteger(input.duration) || input.duration < 1 || input.duration > 24) {
             showToast('Please fill all required fields', 'error');
             return;
         }
@@ -597,8 +602,7 @@ function initAIPlannerForm() {
         // Scroll to result
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Simulate AI processing
-        await delay(2000);
+        // Deterministic planning completes immediately; no artificial wait.
 
         const plan = AIPlanner.generatePlan(input);
         plan.rawType = input.type;
@@ -637,8 +641,8 @@ function renderPlanResult(plan, container) {
         <div class="plan-result-header">
             <div class="plan-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
             <div>
-                <h2>${plan.title}</h2>
-                <p>${plan.category} • ${plan.guests} guests • ${plan.city} • ${plan.duration}h</p>
+                <h2>${escapeHTML(plan.title)}</h2>
+                <p>${plan.category} • ${plan.guests} guests • ${escapeHTML(plan.city)} • ${plan.duration}h</p>
             </div>
         </div>
 
@@ -676,7 +680,7 @@ function renderPlanResult(plan, container) {
                 ${plan.tasks.map(t => `
                     <div class="plan-task">
                         <i class="fas fa-circle-check"></i>
-                        <span>${t.task}</span>
+                        <span>${escapeHTML(t.task)}</span>
                     </div>
                 `).join('')}
             </div>
@@ -700,7 +704,7 @@ function renderPlanResult(plan, container) {
                 ${plan.recommendations.map(r => `
                     <div class="suggestion-item">
                         <i class="fas fa-star"></i>
-                        <p>${r}</p>
+                        <p>${escapeHTML(r)}</p>
                     </div>
                 `).join('')}
             </div>
@@ -708,7 +712,7 @@ function renderPlanResult(plan, container) {
 
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:var(--space-xl);">
             <button class="btn btn-primary" onclick="applyPlanToLiveDashboard()"><i class="fas fa-gauge-high"></i> Apply to Dashboard</button>
-            <button class="btn btn-outline" onclick="exportPlan()"><i class="fas fa-download"></i> Export PDF</button>
+            <button class="btn btn-outline" onclick="exportPlan()"><i class="fas fa-download"></i> Print / Save PDF</button>
             <button class="btn btn-outline" onclick="sharePlan()"><i class="fas fa-share-nodes"></i> Share Plan</button>
         </div>
     `;
@@ -755,17 +759,25 @@ function applyPlanToLiveDashboard() {
     showToast(`"${title}" applied to Dashboard, Tasks & Expense Tracker! 🚀`, 'success');
 
     // Scroll to dashboard
-    const dash = document.getElementById('dashboard');
-    if (dash) dash.scrollIntoView({ behavior: 'smooth' });
+    navigateToPage('dashboard');
 }
 
 // ═══════════════════════════════════════════
 function exportPlan() {
-    showToast('Plan exported as PDF! 📄', 'success');
+    if (!AppState.currentPlan) return showToast('Generate a plan first', 'error');
+    document.body.classList.add('printing-plan');
+    window.print();
+    document.body.classList.remove('printing-plan');
 }
 
-function sharePlan() {
-    showToast('Share link copied to clipboard! 🔗', 'success');
+async function sharePlan() {
+    if (!AppState.currentPlan) return showToast('Generate a plan first', 'error');
+    const plan = AppState.currentPlan;
+    const text = `${plan.title}\n${plan.city} • ${plan.guests} guests\nBudget: ₹${plan.totalBudget.toLocaleString()}\n${window.location.origin}/#/ai-planner`;
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Plan summary copied to clipboard', 'success');
+    } catch { showToast('Clipboard unavailable. Use Export PDF to save your plan.', 'error'); }
 }
 
 // ═══════════════════════════════════════════
@@ -1118,12 +1130,37 @@ function initInvitations() {
     });
 
     document.getElementById('download-invitation').addEventListener('click', () => {
-        showToast('Invitation downloaded! 📥', 'success');
+        generateQRCode();
+        const canvas = document.createElement('canvas');
+        canvas.width = 1000; canvas.height = 1200;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, 1000, 1200);
+        ctx.textAlign = 'center'; ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 54px sans-serif';
+        ctx.fillText("You're Invited!", 500, 130);
+        ctx.fillStyle = '#ffffff'; ctx.font = '36px sans-serif';
+        const lines = [nameInput.value || 'Our Event', dateInput.value, timeInput.value, venueInput.value, messageInput.value];
+        let y = 240;
+        for (const line of lines) {
+            const words = String(line).split(/\s+/); let row = '';
+            for (const word of words) {
+                if (ctx.measureText(row + ' ' + word).width > 840) { ctx.fillText(row, 500, y); y += 48; row = word; }
+                else row += (row ? ' ' : '') + word;
+            }
+            ctx.fillText(row, 500, y); y += 72;
+            if (y > 850) break;
+        }
+        const qrCanvas = document.getElementById('inv-qr-code');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(qrCanvas, 380, 910, 240, 240);
+        canvas.toBlob(blob => { if (blob) downloadBlob(blob, 'celebriplan-invitation.png'); }, 'image/png');
     });
 
-    document.getElementById('copy-link').addEventListener('click', () => {
-        navigator.clipboard.writeText('https://celebriplan.com/invite/abc123');
-        showToast('Invite link copied! 🔗', 'success');
+    document.getElementById('copy-link').textContent = 'Copy invitation details';
+    document.getElementById('copy-link').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText([nameInput.value || 'Our Event', dateInput.value, timeInput.value, venueInput.value, messageInput.value].filter(Boolean).join('\n'));
+            showToast('Invitation details copied', 'success');
+        } catch { showToast('Clipboard unavailable. Download the card instead.', 'error'); }
     });
 
     // Generate initial QR
@@ -1132,52 +1169,16 @@ function initInvitations() {
 
 function generateQRCode() {
     const canvas = document.getElementById('inv-qr-code');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const size = 120;
-    canvas.width = size;
-    canvas.height = size;
-
-    // Simple QR-like pattern
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-
-    const cellSize = 4;
-    const grid = size / cellSize;
-    ctx.fillStyle = '#1a1a3e';
-
-    // Position detection patterns
-    drawFinderPattern(ctx, 0, 0, cellSize);
-    drawFinderPattern(ctx, (grid - 7) * cellSize, 0, cellSize);
-    drawFinderPattern(ctx, 0, (grid - 7) * cellSize, cellSize);
-
-    // Random data modules
-    for (let i = 8; i < grid - 8; i++) {
-        for (let j = 8; j < grid - 8; j++) {
-            if (Math.random() > 0.5) {
-                ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
-    }
-
-    // Timing patterns
-    for (let i = 8; i < grid - 8; i++) {
-        if (i % 2 === 0) {
-            ctx.fillRect(6 * cellSize, i * cellSize, cellSize, cellSize);
-            ctx.fillRect(i * cellSize, 6 * cellSize, cellSize, cellSize);
-        }
-    }
+    const value = ['inv-name', 'inv-date', 'inv-time', 'inv-venue'].map(id => document.getElementById(id).value).filter(Boolean).join(' | ');
+    if (canvas) drawCustomQR(canvas, value.slice(0, 500) || 'CelebriPlan invitation');
 }
 
-function drawFinderPattern(ctx, x, y, cellSize) {
-    // Outer square
-    ctx.fillRect(x, y, 7 * cellSize, 7 * cellSize);
-    // White inner
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(x + cellSize, y + cellSize, 5 * cellSize, 5 * cellSize);
-    // Black center
-    ctx.fillStyle = '#1a1a3e';
-    ctx.fillRect(x + 2 * cellSize, y + 2 * cellSize, 3 * cellSize, 3 * cellSize);
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = filename;
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ═══════════════════════════════════════════
@@ -1421,14 +1422,22 @@ function init3DVenuePreview() {
     window.redrawVenue3D = draw;
 
     // Auto-rotate
+    let frameId = null;
     function animate() {
-        if (animating) {
+        frameId = null;
+        if (document.hidden || !document.getElementById('page-venue-3d').classList.contains('active')) return;
+        if (animating && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             rotation += 0.005;
             draw();
         }
-        requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
     }
-    animate();
+    window.startVenueAnimation = () => { if (frameId === null) animate(); };
+    window.stopVenueAnimation = () => { if (frameId !== null) cancelAnimationFrame(frameId); frameId = null; };
+    document.addEventListener('visibilitychange', () => {
+        window.stopVenueAnimation();
+        if (!document.hidden && document.getElementById('page-venue-3d').classList.contains('active')) window.startVenueAnimation();
+    });
 
     // Controls
     document.querySelectorAll('.venue-type-btn').forEach(btn => {
@@ -1541,7 +1550,7 @@ function initGuestManagement() {
 
     // Send all invites
     document.getElementById('send-all-invites').addEventListener('click', () => {
-        showToast(`Invitations sent to all ${AppState.guests.length} guests! 📩`, 'success');
+        showToast('Use the invitation WhatsApp share button to send invitations. No messages have been sent automatically.', 'info');
     });
 }
 
@@ -1553,7 +1562,7 @@ function renderGuestTable(filter = 'all') {
 
     tbody.innerHTML = filtered.map(g => `
         <tr>
-            <td><strong>${g.name}</strong></td>
+            <td><strong>${escapeHTML(g.name)}</strong></td>
             <td>${groupIcons[g.group] || '👤'} ${g.group.charAt(0).toUpperCase() + g.group.slice(1)}</td>
             <td><span class="guest-status ${g.rsvp}">${g.rsvp.charAt(0).toUpperCase() + g.rsvp.slice(1)}</span></td>
             <td>${g.table > 0 ? `Table ${g.table}` : '—'}</td>
@@ -1609,7 +1618,7 @@ function renderSeatingChart() {
             const x = 50 + r * Math.cos((angle * Math.PI) / 180);
             const y = 50 + r * Math.sin((angle * Math.PI) / 180);
             const filled = i < guests.length;
-            seats.push(`<div class="seat-dot ${filled ? '' : 'empty'}" style="left:${x}%;top:${y}%;transform:translate(-50%,-50%)" title="${filled ? guests[i].name : 'Empty'}"></div>`);
+            seats.push(`<div class="seat-dot ${filled ? '' : 'empty'}" style="left:${x}%;top:${y}%;transform:translate(-50%,-50%)" title="${filled ? escapeHTML(guests[i].name) : 'Empty'}"></div>`);
         }
 
         return `
@@ -1657,7 +1666,7 @@ function initExpenseTracker() {
 
 function renderExpenses() {
     const container = document.getElementById('expense-items');
-    const totalBudget = 50000;
+    const totalBudget = AppState.currentPlan?.totalBudget || 50000;
     const totalSpent = AppState.expenses.reduce((sum, e) => sum + (e.status !== 'pending' ? e.amount : 0), 0);
     const totalDues = AppState.expenses.reduce((sum, e) => sum + (e.status === 'pending' ? e.amount : 0), 0);
     const remaining = totalBudget - totalSpent - totalDues;
@@ -1679,7 +1688,7 @@ function renderExpenses() {
     container.innerHTML = AppState.expenses.map(e => `
         <div class="expense-item" style="border-left-color:${categoryColors[e.category] || '#94a3b8'}">
             <div class="expense-item-left">
-                <span class="expense-item-desc">${e.desc}</span>
+                <span class="expense-item-desc">${escapeHTML(e.desc)}</span>
                 <span class="expense-item-cat">${categoryIcons[e.category] || '📦'} ${e.category.charAt(0).toUpperCase() + e.category.slice(1)}</span>
             </div>
             <div class="expense-item-right">
@@ -1751,13 +1760,13 @@ function renderTasks() {
     const container = document.getElementById('tasks-list');
     container.innerHTML = AppState.tasks.map(t => `
         <div class="task-item ${t.completed ? 'completed' : ''}">
-            <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="toggleTask(${t.id})">
+            <button type="button" class="task-checkbox ${t.completed ? 'checked' : ''}" aria-label="Complete ${escapeHTML(t.title)}" aria-pressed="${t.completed}" onclick="toggleTask(${t.id})">
                 ${t.completed ? '<i class="fas fa-check"></i>' : ''}
-            </div>
+            </button>
             <div class="task-info">
-                <span class="task-name">${t.title}</span>
+                <span class="task-name">${escapeHTML(t.title)}</span>
                 <span class="task-meta">
-                    <span><i class="fas fa-user"></i> ${t.assignee}</span>
+                    <span><i class="fas fa-user"></i> ${escapeHTML(t.assignee)}</span>
                     <span><i class="fas fa-calendar"></i> ${t.due ? new Date(t.due).toLocaleDateString('en-IN', {month:'short', day:'numeric'}) : 'No due date'}</span>
                 </span>
             </div>
@@ -1817,7 +1826,7 @@ function renderTimeline() {
     container.innerHTML = timelineData.map(t => `
         <div class="tl-item">
             <span class="tl-time">${t.time}</span>
-            <span class="tl-title">${t.title}</span>
+            <span class="tl-title">${escapeHTML(t.title)}</span>
             <span class="tl-desc">${t.desc}</span>
         </div>
     `).join('');
@@ -2183,7 +2192,7 @@ function addChatMessage(type, content, isHtml = false) {
     div.id = id;
     div.innerHTML = `
         <div class="chat-avatar"><i class="fas ${iconClass}"></i></div>
-        <div class="chat-bubble">${isHtml ? content : `<p>${content}</p>`}</div>
+        <div class="chat-bubble">${isHtml ? content : `<p>${type === 'user' ? escapeHTML(content) : content}</p>`}</div>
     `;
 
     container.appendChild(div);
@@ -2225,6 +2234,9 @@ function generateChatResponse(message) {
 
         let guests = 50;
         if (guestMatch) guests = parseInt(guestMatch[1]);
+        if (!Number.isSafeInteger(budget) || budget < 1 || budget > 100000000 || !Number.isSafeInteger(guests) || guests < 1 || guests > 10000) {
+            return 'Please use a budget between ₹1 and ₹10 crore and a guest count between 1 and 10,000.';
+        }
 
         const plan = AIPlanner.generatePlan({
             type: detectedType,
@@ -2241,12 +2253,12 @@ function generateChatResponse(message) {
             .map(([k, v]) => `• ${k}: ₹${v.toLocaleString()}`)
             .join('\n');
 
-        return `🎉 Great! Here's your <strong>${plan.title}</strong> plan:\n\n` +
+        return `🎉 Great! Here's your <strong>${escapeHTML(plan.title)}</strong> plan:\n\n` +
             `<strong>Budget: ₹${budget.toLocaleString()}</strong> (${plan.category})\n` +
             `<strong>Guests:</strong> ${guests}\n` +
             `<strong>Per Person:</strong> ₹${plan.perPersonBudget.toLocaleString()}\n\n` +
             `<strong>💰 Budget Breakdown:</strong>\n${budgetBreakdown}\n\n` +
-            `<strong>📋 Key Tasks:</strong>\n${plan.tasks.slice(0, 4).map(t => `• ${t.task}`).join('\n')}\n\n` +
+            `<strong>📋 Key Tasks:</strong>\n${plan.tasks.slice(0, 4).map(t => `• ${escapeHTML(t.task)}`).join('\n')}\n\n` +
             `<strong>💡 Top Tip:</strong> ${plan.recommendations[0]}\n\n` +
             `Want me to help with vendor booking or invitation design? 😊`;
     }
@@ -2301,6 +2313,56 @@ function initFooterLinks() {
     });
 }
 
+function initAccessibility() {
+    document.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(control => {
+        if (control.labels?.length || control.hasAttribute('aria-label')) return;
+        const label = control.closest('.form-group')?.querySelector('label');
+        if (label && control.id) label.htmlFor = control.id;
+        else control.setAttribute('aria-label', control.placeholder || control.id.replace(/-/g, ' '));
+    });
+    document.querySelectorAll('button').forEach(button => {
+        if (!button.textContent.trim() && !button.hasAttribute('aria-label')) {
+            button.setAttribute('aria-label', button.title || button.id.replace(/-/g, ' ') || 'Close dialog');
+        }
+    });
+    document.querySelector('.skip-link').addEventListener('click', event => {
+        event.preventDefault();
+        const main = document.querySelector('.app-page.active');
+        main.tabIndex = -1;
+        main.focus();
+    });
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        const heading = modal.querySelector('h2, h3');
+        if (heading) {
+            heading.id ||= `${modal.id}-heading`;
+            modal.setAttribute('aria-labelledby', heading.id);
+        }
+        let opener = null;
+        let wasOpen = false;
+        new MutationObserver(() => {
+            const isOpen = modal.classList.contains('active');
+            if (isOpen === wasOpen) return;
+            wasOpen = isOpen;
+            const anyModalOpen = !!document.querySelector('.modal-overlay.active');
+            document.querySelectorAll('.app-page, .navbar, .footer, .chatbot-widget').forEach(element => { element.inert = anyModalOpen; });
+            if (isOpen) {
+                opener = document.activeElement;
+                modal.querySelector('button, input, select, textarea, [href]')?.focus();
+            } else if (opener?.isConnected) opener.focus();
+        }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+        modal.addEventListener('keydown', event => {
+            if (event.key !== 'Tab') return;
+            const elements = [...modal.querySelectorAll('button, input:not([type="hidden"]), select, textarea, a[href], [tabindex="0"]')].filter(element => !element.disabled && element.getClientRects().length);
+            if (!elements.length) return;
+            const first = elements[0], last = elements.at(-1);
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        });
+    });
+}
+
 function initSmoothScroll() {
     // Only smooth-scroll to anchors that are within the current active page
     document.querySelectorAll('a[href^="#"]:not([href="#"]):not([href^="#/"])').forEach(link => {
@@ -2342,9 +2404,10 @@ function showToast(message, type = 'info') {
     }
 
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast ${['success', 'error', 'info'].includes(type) ? type : 'info'}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
     const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
-    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${escapeHTML(message)}`;
     container.appendChild(toast);
 
     setTimeout(() => {
@@ -2551,16 +2614,16 @@ function initVendorModals() {
             // Add expense
             AppState.expenses.push({
                 id: Date.now(),
-                desc: `Booking Advance for ${vendor.name}`,
+                desc: `Estimated advance for ${vendor.name} (not paid)`,
                 category: vendor.category || 'other',
                 amount: 15000,
-                status: 'paid'
+                status: 'pending'
             });
             renderExpenses();
 
             bookingModal.classList.remove('active');
             bookingForm.reset();
-            showToast(`Booking request confirmed with ${vendor.name} for ${guests} guests! 🎉`, 'success');
+            showToast(`Demo booking saved for ${vendor.name}. Contact the vendor to confirm availability; no reservation has been made.`, 'success');
         });
     }
 
@@ -2574,7 +2637,7 @@ function initVendorModals() {
 
             quoteModal.classList.remove('active');
             quoteForm.reset();
-            showToast(`Instant quotation request sent to ${vendor.name}! Details dispatched to ${contact} 📋`, 'success');
+            showToast(`Quote details prepared for ${vendor.name}. This demo does not send email or contact vendors.`, 'success');
         });
     }
 }
@@ -2765,28 +2828,21 @@ function updateRSVPTracker() {
 }
 
 function drawCustomQR(canvas, dataText) {
+    qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+    const code = qrcode(0, 'M');
+    code.addData(String(dataText).slice(0, 500)); code.make();
+    const count = code.getModuleCount(), margin = 4, scale = 4;
+    canvas.width = canvas.height = (count + margin * 2) * scale;
     const ctx = canvas.getContext('2d');
-    const size = canvas.width;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-
-    const cellSize = 5;
-    const grid = size / cellSize;
-    ctx.fillStyle = '#111827';
-
-    // Corner Finder Patterns
-    drawFinderPattern(ctx, 0, 0, cellSize);
-    drawFinderPattern(ctx, (grid - 7) * cellSize, 0, cellSize);
-    drawFinderPattern(ctx, 0, (grid - 7) * cellSize, cellSize);
-
-    // Seeded data dots
-    for (let i = 8; i < grid - 8; i++) {
-        for (let j = 8; j < grid - 8; j++) {
-            if ((i * 3 + j * 7 + (dataText ? dataText.length : 5)) % 3 === 0) {
-                ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000000';
+    for (let row = 0; row < count; row++) for (let col = 0; col < count; col++) {
+        if (code.isDark(row, col)) ctx.fillRect((col + margin) * scale, (row + margin) * scale, scale, scale);
     }
+}
+
+function escapeCalendarText(value) {
+    return String(value).replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
 }
 
 // ═══════════════════════════════════════════
@@ -2853,7 +2909,7 @@ function syncTaskToGoogleCalendar(taskId) {
 }
 
 function syncAllTasksToGoogleCalendar() {
-    showToast('Syncing all tasks with Google Calendar... 📅', 'success');
+    showToast('Opening one task in Google Calendar and downloading all tasks as an ICS file. Import the file to add the full list.', 'info');
     // Open primary milestone in Google Calendar & provide .ICS export
     if (AppState.tasks.length > 0) {
         syncTaskToGoogleCalendar(AppState.tasks[0].id);
@@ -2880,8 +2936,8 @@ function downloadICSFile() {
         icsLines.push(`DTSTAMP:${formatICS(new Date())}`);
         icsLines.push(`DTSTART:${start}`);
         icsLines.push(`DTEND:${end}`);
-        icsLines.push(`SUMMARY:CelebriPlan: ${t.title}`);
-        icsLines.push(`DESCRIPTION:Assigned to: ${t.assignee} | Priority: ${t.priority}`);
+        icsLines.push(`SUMMARY:CelebriPlan: ${escapeCalendarText(t.title)}`);
+        icsLines.push(`DESCRIPTION:Assigned to: ${escapeCalendarText(t.assignee)} | Priority: ${t.priority}`);
         icsLines.push(`STATUS:CONFIRMED`);
         icsLines.push('END:VEVENT');
     });
