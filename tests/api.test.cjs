@@ -1,6 +1,8 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
+delete process.env.GEMINI_API_KEY;
+delete process.env.GOOGLE_API_KEY;
 const handleRequest = require('../server');
 const { allocateBudget } = require('../planning');
 const { escapeICS } = require('../security');

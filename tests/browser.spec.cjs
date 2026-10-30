@@ -116,3 +116,83 @@ test('3D preview loads only when visited', async ({page}) => {
     await page.goto('/#/venue-3d');
     expect(await page.evaluate(() => typeof window.redrawVenue3D)).toBe('function');
 });
+
+test('Gemini plan is rendered safely and applied to the dashboard', async ({page}) => {
+    const unsafe = '<img src=x onerror="window.__xss=1">';
+    await page.route('**/api/ai/plan',route=>route.fulfill({json:{
+        mode:'generative',provider:'Google Gemini',model:'test-model',title:'A Personalised Birthday',
+        budget:{venue:20000,food:20000,decoration:5000,photography:3000,entertainment:1000,other:1000},
+        tasks:['Book garden','Confirm Jain caterer','Prepare invitations'],
+        timeline:[{start:'18:00',activity:unsafe},{start:'19:00',activity:'Cake'},{start:'20:00',activity:'Dinner'}],
+        decorSuggestions:[unsafe,'Reusable flowers'],recommendations:['Keep a rain plan','Verify availability'],foodMenu:[unsafe,'Jain mains'],
+    }}));
+    await page.goto('/#/ai-planner');
+    await page.locator('#event-type').selectOption('birthday');
+    await page.locator('#generate-plan-btn').click();
+    await expect(page.locator('.plan-source')).toContainText('Personalised with Google Gemini');
+    await expect(page.locator('#plan-result')).toContainText(unsafe);
+    await expect(page.locator('#plan-result img')).toHaveCount(0);
+    await page.getByRole('button',{name:'Apply to Dashboard'}).click();
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(3);
+    expect(await page.evaluate(()=>window.__xss)).toBeUndefined();
+});
+test('AI outage keeps the built-in plan usable and re-enables generation', async ({page}) => {
+    await page.route('**/api/ai/plan',route=>route.abort());
+    await page.goto('/#/ai-planner');
+    await page.locator('#event-type').selectOption('wedding');
+    await page.locator('#generate-plan-btn').click();
+    await expect(page.locator('.plan-source')).toContainText('Built-in planning mode');
+    await expect(page.locator('#generate-plan-btn')).toBeEnabled();
+    await expect(page.locator('#plan-result')).toContainText('Budget Allocation');
+});
+test('Gemini chat replies are plain text and cannot inject markup', async ({page}) => {
+    const reply='Try a garden party. <img src=x onerror="window.__xss=1">';
+    await page.route('**/api/ai/chat',route=>route.fulfill({json:{reply,mode:'generative'}}));
+    await page.goto('/');
+    await page.locator('#chatbot-toggle').click();
+    await page.locator('#chatbot-input').fill('Suggest a birthday theme');
+    await page.locator('#chatbot-send').click();
+    await expect(page.locator('.chat-message.bot').last()).toContainText(reply);
+    await expect(page.locator('.chat-message.bot img')).toHaveCount(0);
+    expect(await page.evaluate(()=>window.__xss)).toBeUndefined();
+});
+
+test('guest CSV import and saved event budget/tasks survive a full reload', async ({page}) => {
+    await page.goto('/#/ai-planner');
+    await page.locator('#event-type').selectOption('birthday');
+    await page.locator('#event-budget').fill('75005');
+    await page.locator('#generate-plan-btn').click();
+    await page.getByRole('button',{name:'Apply to Dashboard'}).click();
+    await page.goto('/#/guest-management');
+    const csv={name:'guests.csv',mimeType:'text/csv',buffer:Buffer.from('name,phone,email,group\n"Doe, Jane",9876543210,jane@example.com,friends\nDev Guest,9876543211,,family')};
+    await page.locator('#guest-csv-file').setInputFiles(csv);
+    await expect(page.locator('#guest-table-body tr')).toHaveCount(10);
+    await page.locator('#guest-csv-file').setInputFiles(csv);
+    await expect(page.locator('#guest-table-body tr')).toHaveCount(10);
+    await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('celebriplan:event:v1')).guests.length)).toBe(10);
+    await page.reload();
+    await expect(page.locator('#guest-table-body')).toContainText('Doe, Jane');
+    await page.goto('/#/dashboard');
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(4);
+    await page.goto('/#/expense-tracker');
+    await expect(page.locator('#exp-total-budget')).toContainText('75,005');
+});
+test('corrupt stored state recovers safely and the saved event can be cleared', async ({page}) => {
+    await page.addInitScript(()=>{if(!sessionStorage.getItem('seeded')){localStorage.setItem('celebriplan:event:v1','{corrupt');sessionStorage.setItem('seeded','yes');}});
+    await page.goto('/#/dashboard');
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(8);
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:'Clear saved event'}).click();
+    await expect(page.locator('#tasks-list .task-item')).toHaveCount(8);
+    await expect(page.locator('#saved-event-status')).toHaveText('Event saved on this device');
+});
+test('venue zoom and pause controls work instead of being decorative buttons', async ({page}) => {
+    await page.goto('/#/venue-3d');
+    await expect(page.locator('#venue-canvas')).toHaveAttribute('data-zoom','1');
+    await page.locator('#v3d-zoom-in').click();
+    await expect(page.locator('#venue-canvas')).toHaveAttribute('data-zoom','1.1');
+    await page.locator('#v3d-zoom-out').click();
+    await expect(page.locator('#venue-canvas')).toHaveAttribute('data-zoom','1');
+    await page.locator('#v3d-rotate').click();
+    await expect(page.locator('#v3d-rotate')).toHaveAttribute('aria-pressed','false');
+});

@@ -17,6 +17,10 @@
       "use": "@vercel/static"
     },
     {
+      "src": "event-data.js",
+      "use": "@vercel/static"
+    },
+    {
       "src": "vendor/qrcode.js",
       "use": "@vercel/static"
     },

@@ -12,6 +12,19 @@ const path = require('path');
 const { randomUUID } = require('crypto');
 const { RequestError, text, number, validatePlan, readJSONBody, escapeICS, headers: securityHeaders } = require('./security');
 const { allocateBudget } = require('./planning');
+const gemini = require('./gemini');
+const aiRequests = new Map();
+let activeAIRequests = 0;
+
+async function limitedAIRequest(req, action) {
+    const now = Date.now();
+    const identity = req.headers['x-vercel-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+    for (const [key,item] of aiRequests) if (now - item.started > 600000) aiRequests.delete(key);
+    const usage = aiRequests.get(identity) || {started:now,count:0};
+    if (usage.count >= 12 || activeAIRequests >= 3 || aiRequests.size >= 2000) throw new RequestError('AI request limit reached; try again later',429);
+    usage.count++; aiRequests.set(identity,usage); activeAIRequests++;
+    try { return await action(); } finally { activeAIRequests--; }
+}
 
 const PORT = process.env.PORT || 3000;
 
@@ -184,7 +197,8 @@ async function handleRequest(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     const origin = req.headers.origin;
     const allowedOrigins = new Set(['https://celebri-plan.vercel.app', 'http://localhost:3000', 'http://127.0.0.1:3000']);
-    if ((origin && !allowedOrigins.has(origin)) || req.headers['sec-fetch-site'] === 'cross-site') {
+    const localOrigin = !process.env.VERCEL && /^http:\/\/(?:localhost|127\.0\.0\.1):\d+$/.test(origin || '');
+    if ((origin && !allowedOrigins.has(origin) && !localOrigin) || req.headers['sec-fetch-site'] === 'cross-site') {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Origin is not allowed' }));
         return;
@@ -208,12 +222,35 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && (pathname === '/api/ai/plan' || pathNormalized === '/ai/plan')) {
         try {
             const input = await readJSONBody(req);
-            const planOutput = runAIEngine(validatePlan(input));
+            const details = validatePlan(input);
+            let planOutput = {...runAIEngine(details), provider:'Built-in planner', mode:'rules'};
+            if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+                try { planOutput = await limitedAIRequest(req,() => gemini.generatePlan(details)) || planOutput; }
+                catch (error) {
+                    console.warn('Gemini plan unavailable',{status:error.status || null,kind:error.name});
+                    planOutput.notice = 'Gemini is temporarily unavailable or its request limit was reached. Showing a built-in plan.';
+                }
+            } else planOutput.notice = 'Showing a built-in plan. Generative AI is not configured.';
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(planOutput, null, 2));
         } catch (err) {
             res.writeHead(err.status || 400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: err.message }));
+        }
+        return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/ai/chat') {
+        try {
+            const input = await readJSONBody(req);
+            const message = text(input.message,'message',2000);
+            if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) throw new RequestError('Gemini is not configured',503);
+            const reply = await limitedAIRequest(req,() => gemini.generateReply(message));
+            res.writeHead(200,{'Content-Type':'application/json'}); res.end(JSON.stringify(reply));
+        } catch (err) {
+            const status = err instanceof RequestError ? err.status : 503;
+            res.writeHead(status,{'Content-Type':'application/json'});
+            res.end(JSON.stringify({error:status === 400 ? err.message : 'AI assistant is temporarily unavailable'}));
         }
         return;
     }
@@ -320,7 +357,7 @@ async function handleRequest(req, res) {
     }
 
     // Serve only intentional public assets, never source/configuration/secrets.
-    const publicFiles = new Set(['/index.html', '/app.js', '/styles.css', '/planning.js', '/vendor/qrcode.js']);
+    const publicFiles = new Set(['/index.html', '/app.js', '/styles.css', '/planning.js', '/event-data.js', '/vendor/qrcode.js']);
     const assetPath = pathname === '/' ? '/index.html' : pathname;
     if (!['GET', 'HEAD'].includes(req.method)) {
         res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return;

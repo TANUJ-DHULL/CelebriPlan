@@ -39,6 +39,11 @@ function validatePlan(value) {
         guests: number(input.guests ?? 50, 'guests', 1, 10000),
         durationHours: number(input.durationHours ?? 4, 'durationHours', 1, 24),
     };
+    const food = input.food ?? 'both';
+    if (!['veg','nonveg','both','jain'].includes(food)) throw new RequestError('Unsupported food preference');
+    output.food = food;
+    if (input.notes !== undefined && (typeof input.notes !== 'string' || input.notes.length > 2000)) throw new RequestError('Notes must be text up to 2000 characters');
+    output.notes = input.notes || '';
     if (input.budgetPaise !== undefined) output.budgetPaise = number(input.budgetPaise, 'budgetPaise', 100, 10000000000);
     else output.budget = number(input.budget ?? 50000, 'budget', 1, 100000000);
     return output;

@@ -17,10 +17,55 @@ const AppState = {
     chatHistory: [],
     currentPlan: null,
     dashboardPlan: null,
+    eventBudget: 50000,
+    eventTimeline: [],
     eventDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
 };
 
 // ─── Initialization ───
+let eventStorageReady = false;
+let eventSaveTimer;
+let eventStorageWarningShown = false;
+function saveEvent() {
+    if (!eventStorageReady) return;
+    try {
+        CelebrationData.save(localStorage,{version:1,budget:AppState.eventBudget,timeline:AppState.eventTimeline,guests:AppState.guests,tasks:AppState.tasks,expenses:AppState.expenses});
+        const status = document.getElementById('saved-event-status');
+        if (status) status.textContent = 'Event saved on this device';
+    } catch {
+        const status = document.getElementById('saved-event-status');
+        if (status) status.textContent = 'This session only — device storage is unavailable';
+        if (!eventStorageWarningShown) { eventStorageWarningShown = true; showToast('Device storage is unavailable. Changes will last for this session only.', 'info'); }
+    }
+}
+function scheduleEventSave() {
+    if (!eventStorageReady) return;
+    clearTimeout(eventSaveTimer);
+    eventSaveTimer = setTimeout(saveEvent,150);
+}
+function initEventPersistence() {
+    let saved = null;
+    try { saved = CelebrationData.load(localStorage); } catch { /* Browser may block storage. */ }
+    if (saved) {
+        AppState.guests=saved.guests; AppState.tasks=saved.tasks; AppState.expenses=saved.expenses; AppState.eventBudget=saved.budget; AppState.eventTimeline=saved.timeline;
+        renderGuestTable(); renderSeatingChart(); renderTasks(); renderExpenses(); renderTimeline(); updateProgress(); updateRSVPTracker();
+    }
+    eventStorageReady = true;
+    const header = document.querySelector('#dashboard .section-header');
+    const status = document.createElement('p'); status.id='saved-event-status'; status.className='section-subtitle';
+    header.appendChild(status);
+    const reset = document.createElement('button'); reset.type='button'; reset.className='btn btn-outline btn-sm'; reset.textContent='Clear saved event';
+    reset.addEventListener('click',()=>{
+        if (!window.confirm('Clear the saved event on this device and restore demo data?')) return;
+        eventStorageReady=false; clearTimeout(eventSaveTimer);
+        try { localStorage.removeItem(CelebrationData.KEY); window.location.reload(); }
+        catch { eventStorageReady=true; showToast('Device storage could not be cleared', 'error'); }
+    });
+    header.appendChild(reset);
+    window.addEventListener('pagehide',saveEvent);
+    saveEvent();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initPageRouter();
@@ -45,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFooterLinks();
     initAccessibility();
     initScrollAnimations();
+    initEventPersistence();
     // Run initial budget calculation
     calculateBudget();
 });
@@ -602,13 +648,32 @@ function initAIPlannerForm() {
         // Scroll to result
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Deterministic planning completes immediately; no artificial wait.
-
-        const plan = AIPlanner.generatePlan(input);
+        let plan = AIPlanner.generatePlan(input);
+        plan.mode = 'rules';
+        const submit = document.getElementById('generate-plan-btn');
+        submit.disabled = true;
+        resultSection.setAttribute('aria-busy', 'true');
+        try {
+            const response = await fetch('/api/ai/plan', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                signal:AbortSignal.timeout(25000),
+                body:JSON.stringify({...input,durationHours:input.duration}),
+            });
+            if (!response.ok) throw new Error('Planner unavailable');
+            const output = await response.json();
+            if (output.mode === 'generative') {
+                plan = {...plan,...output,tasks:output.tasks.map(task => ({task,priority:'high'}))};
+            } else plan.notice = output.notice || 'Showing a built-in plan.';
+        } catch {
+            plan.notice = 'Personalised AI is unavailable. Showing a built-in plan.';
+        } finally {
+            submit.disabled = false;
+            resultSection.setAttribute('aria-busy', 'false');
+        }
         plan.rawType = input.type;
         plan.rawTheme = input.theme;
         renderPlanResult(plan, resultContainer);
-        showToast('AI Plan generated successfully! 🎉', 'success');
+        showToast(plan.mode === 'generative' ? 'Personalised Gemini plan generated! 🎉' : 'Built-in plan ready. AI suggestions are currently unavailable.', 'info');
     });
 }
 
@@ -636,8 +701,11 @@ function renderPlanResult(plan, container) {
         theme: plan.rawTheme || 'modern',
         durationHours: plan.duration || 4
     });
-    AppState.dashboardPlan = dashboardPlan;
+    AppState.dashboardPlan = plan.mode === 'generative'
+        ? {title:plan.title,budget:plan.budget,tasks:plan.tasks.map(item => item.task),timeline:plan.timeline}
+        : dashboardPlan;
     container.innerHTML = `
+        <p class="plan-source" role="status">${plan.mode === 'generative' ? 'Personalised with Google Gemini' : 'Built-in planning mode'}${plan.notice ? ` — ${escapeHTML(plan.notice)}` : ''}</p>
         <div class="plan-result-header">
             <div class="plan-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
             <div>
@@ -667,8 +735,8 @@ function renderPlanResult(plan, container) {
             <div class="plan-timeline">
                 ${plan.timeline.map(item => `
                     <div class="timeline-item">
-                        <span class="timeline-time">${item.start}</span>
-                        <span class="timeline-activity">${item.activity}</span>
+                        <span class="timeline-time">${escapeHTML(item.start)}</span>
+                        <span class="timeline-activity">${escapeHTML(item.activity)}</span>
                     </div>
                 `).join('')}
             </div>
@@ -692,14 +760,15 @@ function renderPlanResult(plan, container) {
                 ${plan.decorSuggestions.map(d => `
                     <div class="plan-task">
                         <i class="fas fa-sparkles" style="color:var(--accent)"></i>
-                        <span>${d}</span>
+                        <span>${escapeHTML(d)}</span>
                     </div>
                 `).join('')}
             </div>
         </div>
 
+        ${plan.foodMenu?.length ? `<div class="plan-section"><h3>Suggested Menu</h3><ul>${plan.foodMenu.map(item => `<li>${escapeHTML(item)}</li>`).join('')}</ul></div>` : ''}
         <div class="plan-section">
-            <h3><i class="fas fa-lightbulb"></i> AI Recommendations</h3>
+            <h3><i class="fas fa-lightbulb"></i> Planning Recommendations</h3>
             <div class="suggestions-list">
                 ${plan.recommendations.map(r => `
                     <div class="suggestion-item">
@@ -725,6 +794,9 @@ function applyPlanToLiveDashboard() {
     }
 
     const { title, tasks, budget } = AppState.dashboardPlan;
+    AppState.eventBudget = AppState.currentPlan?.totalBudget || 50000;
+    AppState.eventTimeline = AppState.dashboardPlan.timeline || [];
+    renderTimeline();
 
     // Apply tasks to dashboard
     if (tasks && tasks.length > 0) {
@@ -1195,6 +1267,7 @@ function init3DVenuePreview() {
     let capacity = 100;
     let rotation = 0;
     let animating = true;
+    let zoom = 1;
 
     function draw() {
         const ctx = canvas.getContext('2d');
@@ -1214,6 +1287,11 @@ function init3DVenuePreview() {
         gradient.addColorStop(1, bg2);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
+
+        ctx.translate(w / 2,h / 2);
+        ctx.scale(zoom,zoom);
+        ctx.translate(-w / 2,-h / 2);
+        canvas.dataset.zoom = String(zoom);
 
         // Floor
         ctx.fillStyle = 'rgba(255,255,255,0.03)';
@@ -1426,10 +1504,9 @@ function init3DVenuePreview() {
     function animate() {
         frameId = null;
         if (document.hidden || !document.getElementById('page-venue-3d').classList.contains('active')) return;
-        if (animating && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            rotation += 0.005;
-            draw();
-        }
+        if (!animating || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        rotation += 0.005;
+        draw();
         frameId = requestAnimationFrame(animate);
     }
     window.startVenueAnimation = () => { if (frameId === null) animate(); };
@@ -1497,7 +1574,20 @@ function init3DVenuePreview() {
     // 3D Controls
     document.getElementById('v3d-rotate').addEventListener('click', () => {
         animating = !animating;
+        document.getElementById('v3d-rotate').setAttribute('aria-pressed',String(animating));
+        if (animating) window.startVenueAnimation(); else window.stopVenueAnimation();
     });
+    document.getElementById('v3d-rotate').setAttribute('aria-pressed','true');
+    document.getElementById('v3d-zoom-in').addEventListener('click',()=>{zoom=Math.min(1.6,Math.round((zoom+.1)*10)/10);draw();});
+    document.getElementById('v3d-zoom-out').addEventListener('click',()=>{zoom=Math.max(.6,Math.round((zoom-.1)*10)/10);draw();});
+    document.getElementById('v3d-fullscreen').addEventListener('click',async()=>{
+        try {
+            if (document.fullscreenElement) await document.exitFullscreen();
+            else await canvas.parentElement.requestFullscreen();
+            draw();
+        } catch {showToast('Fullscreen is unavailable in this browser','info');}
+    });
+    document.addEventListener('fullscreenchange',draw);
 }
 
 // ═══════════════════════════════════════════
@@ -1552,9 +1642,34 @@ function initGuestManagement() {
     document.getElementById('send-all-invites').addEventListener('click', () => {
         showToast('Use the invitation WhatsApp share button to send invitations. No messages have been sent automatically.', 'info');
     });
+    const file = document.getElementById('guest-csv-file');
+    document.getElementById('import-csv').addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+        try {
+            const selected = file.files[0];
+            if (!selected) return;
+            if (selected.size > 1048576) throw new Error('Please import a CSV smaller than 1 MB');
+            const guests = CelebrationData.parseCSV(await selected.text());
+            const existing = new Set(AppState.guests.map(g => `${g.name.toLowerCase()}|${g.phone}`));
+            const fresh = guests.filter(g => {
+                const key = `${g.name.toLowerCase()}|${g.phone}`;
+                if (existing.has(key)) return false;
+                existing.add(key); return true;
+            });
+            if (AppState.guests.length + fresh.length > 5000) throw new Error('Guest limit is 5000 per event');
+            AppState.guests.push(...fresh);
+            renderGuestTable(); renderSeatingChart(); updateRSVPTracker();
+            showToast(`Imported ${fresh.length} guests; ${guests.length - fresh.length} duplicates skipped`, 'success');
+        } catch (error) { showToast(error.message, 'error'); }
+        finally { file.value = ''; }
+    });
+    document.getElementById('export-guests-csv').addEventListener('click', () => {
+        downloadBlob(new Blob([CelebrationData.guestCSV(AppState.guests)],{type:'text/csv;charset=utf-8'}),'celebriplan-guests.csv');
+    });
 }
 
 function renderGuestTable(filter = 'all') {
+    scheduleEventSave();
     const tbody = document.getElementById('guest-table-body');
     const groupIcons = { family: '👨‍👩‍👦', friends: '🤝', colleagues: '💼', vip: '⭐', others: '👤' };
 
@@ -1665,8 +1780,9 @@ function initExpenseTracker() {
 }
 
 function renderExpenses() {
+    scheduleEventSave();
     const container = document.getElementById('expense-items');
-    const totalBudget = AppState.currentPlan?.totalBudget || 50000;
+    const totalBudget = AppState.eventBudget;
     const totalSpent = AppState.expenses.reduce((sum, e) => sum + (e.status !== 'pending' ? e.amount : 0), 0);
     const totalDues = AppState.expenses.reduce((sum, e) => sum + (e.status === 'pending' ? e.amount : 0), 0);
     const remaining = totalBudget - totalSpent - totalDues;
@@ -1757,6 +1873,7 @@ function initDashboard() {
 }
 
 function renderTasks() {
+    scheduleEventSave();
     const container = document.getElementById('tasks-list');
     container.innerHTML = AppState.tasks.map(t => `
         <div class="task-item ${t.completed ? 'completed' : ''}">
@@ -1813,7 +1930,7 @@ function updateProgress() {
 
 function renderTimeline() {
     const container = document.getElementById('event-timeline');
-    const timelineData = [
+    const timelineData = AppState.eventTimeline.length ? AppState.eventTimeline.map(item=>({time:item.start,title:item.activity,desc:''})) : [
         { time: '06:00 PM', title: 'Guest Arrival', desc: 'Welcome drinks & registration' },
         { time: '06:30 PM', title: 'Opening', desc: 'Welcome speech & introduction' },
         { time: '07:00 PM', title: 'Main Event', desc: 'Cake cutting / ceremonies' },
@@ -1825,9 +1942,9 @@ function renderTimeline() {
 
     container.innerHTML = timelineData.map(t => `
         <div class="tl-item">
-            <span class="tl-time">${t.time}</span>
+            <span class="tl-time">${escapeHTML(t.time)}</span>
             <span class="tl-title">${escapeHTML(t.title)}</span>
-            <span class="tl-desc">${t.desc}</span>
+            <span class="tl-desc">${escapeHTML(t.desc)}</span>
         </div>
     `).join('');
 }
@@ -2162,10 +2279,12 @@ function initChatbot() {
     });
 }
 
-function sendChatMessage() {
+async function sendChatMessage() {
     const input = document.getElementById('chatbot-input');
+    const send = document.getElementById('chatbot-send');
     const message = input.value.trim();
-    if (!message) return;
+    if (!message || send.disabled) return;
+    if (message.length > 2000) return showToast('Please keep the message under 2000 characters', 'error');
 
     addChatMessage('user', message);
     input.value = '';
@@ -2173,18 +2292,28 @@ function sendChatMessage() {
     // Show typing indicator
     const typingId = addChatMessage('bot', '<div class="loading-dots" style="display:flex;gap:4px;"><span style="width:8px;height:8px;background:var(--primary-light);border-radius:50%;animation:pulse 1s infinite;"></span><span style="width:8px;height:8px;background:var(--primary-light);border-radius:50%;animation:pulse 1s 0.2s infinite;"></span><span style="width:8px;height:8px;background:var(--primary-light);border-radius:50%;animation:pulse 1s 0.4s infinite;"></span></div>', true);
 
-    setTimeout(() => {
-        const response = generateChatResponse(message);
-        // Remove typing indicator and add real response
+    send.disabled = true;
+    try {
+        const response = await fetch('/api/ai/chat', {
+            method:'POST',headers:{'Content-Type':'application/json'},
+            signal:AbortSignal.timeout(25000),body:JSON.stringify({message}),
+        });
+        if (!response.ok) throw new Error('AI unavailable');
+        const output = await response.json();
+        if (typeof output.reply !== 'string' || output.reply.length > 4000) throw new Error('Invalid reply');
+        addChatMessage('bot', escapeHTML(output.reply));
+    } catch {
+        addChatMessage('bot', '<strong>Built-in guidance (Gemini unavailable):</strong><br>' + generateChatResponse(message));
+    } finally {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
-        addChatMessage('bot', response);
-    }, 1500);
+        send.disabled = false;
+    }
 }
 
 function addChatMessage(type, content, isHtml = false) {
     const container = document.getElementById('chatbot-messages');
-    const id = 'msg-' + Date.now();
+    const id = 'msg-' + crypto.randomUUID();
     const iconClass = type === 'bot' ? 'fa-robot' : 'fa-user';
 
     const div = document.createElement('div');
@@ -2314,6 +2443,8 @@ function initFooterLinks() {
 }
 
 function initAccessibility() {
+    const inputLimits={'event-city':120,'event-notes':2000,'guest-name':120,'guest-phone':40,'guest-email':160,'task-title':500,'task-assignee':160,'expense-desc':500,'rsvp-guest-name':120,'rsvp-guest-phone':40};
+    for (const [id,limit] of Object.entries(inputLimits)) document.getElementById(id)?.setAttribute('maxlength',String(limit));
     document.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(control => {
         if (control.labels?.length || control.hasAttribute('aria-label')) return;
         const label = control.closest('.form-group')?.querySelector('label');
