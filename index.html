@@ -33,16 +33,10 @@
                 <li><a href="javascript:void(0)" class="nav-link" data-page="guest-management" onclick="navigateToPage('guest-management')">Guests</a></li>
                 <li><a href="javascript:void(0)" class="nav-link" data-page="expense-tracker" onclick="navigateToPage('expense-tracker')">Expenses</a></li>
                 <li><a href="javascript:void(0)" class="nav-link" data-page="dashboard" onclick="navigateToPage('dashboard')">Dashboard</a></li>
-                <li class="nav-blueprint-mobile">
-                    <button type="button" class="btn btn-outline nav-link nav-blueprint-btn" id="nav-blueprint-mobile-btn">
-                        <i class="fas fa-sitemap" aria-hidden="true"></i> Startup Blueprint
-                    </button>
-                </li>
+
             </ul>
             <div class="nav-actions">
-                <button class="btn btn-outline nav-blueprint-btn" id="nav-blueprint-btn" title="View Full-Stack Startup Architecture & ER Diagram">
-                    <i class="fas fa-sitemap"></i> <span class="nav-btn-text">Startup Blueprint</span>
-                </button>
+
                 <button class="btn btn-ghost" id="theme-toggle" aria-label="Toggle Theme">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -153,7 +147,7 @@
             <span>Scroll to explore</span>
         </div>
     </section>
-        
+
     <!-- ═══════════════════════════════════════════ -->
     <!-- CATEGORIES & MODULES SHOWCASE HUB -->
     <!-- ═══════════════════════════════════════════ -->
@@ -169,7 +163,7 @@
                 <div class="cat-module-card" onclick="navigateToPage('ai-planner')">
                     <div class="cat-card-top">
                         <div class="cat-icon-box" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"><i class="fas fa-brain"></i></div>
-                        <span class="cat-badge-pill">Section 9 Engine</span>
+                        <span class="cat-badge-pill">Event Planning</span>
                     </div>
                     <h3>AI Event Planner</h3>
                     <p>Generate complete event blueprints with per-category budgets, timed activity schedules, decoration concepts, and food menus.</p>
@@ -406,7 +400,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 2: AI EVENT PLANNER ══════ -->
     <main class="app-page" id="page-ai-planner">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -416,7 +410,7 @@
             <div class="breadcrumb-trail">
                 <span class="breadcrumb-home" onclick="navigateToPage('home')"><i class="fas fa-house"></i> Home</span>
                 <i class="fas fa-chevron-right"></i>
-                <span class="breadcrumb-current">AI Event Planner & Section 9 Engine</span>
+                <span class="breadcrumb-current">AI Event Planner</span>
             </div>
             <div class="breadcrumb-quick-nav">
                 <span class="quick-nav-label">Quick Jump:</span>
@@ -430,14 +424,7 @@
                 <span class="section-badge"><i class="fas fa-brain"></i> AI-Powered</span>
                 <h2 class="section-title">Smart Event <span class="text-gradient">Planner</span></h2>
                 <p class="section-subtitle">Tell us about your event and our AI will generate a complete plan with themes, timeline, budget breakdown & tasks.</p>
-                <div class="planner-mode-tabs">
-                    <button class="planner-tab-btn active" id="tab-btn-form" type="button">
-                        <i class="fas fa-sliders"></i> Interactive Planner
-                    </button>
-                    <button class="planner-tab-btn" id="tab-btn-engine" type="button">
-                        <i class="fas fa-code"></i> 9. AI Engine JSON Playground
-                    </button>
-                </div>
+
             </div>
             <div class="planner-layout">
                 <div class="planner-form-section">
@@ -514,61 +501,15 @@
                         </form>
                     </div>
 
-                    <!-- Tab 2: Section 9 AI Planning Engine JSON Playground -->
-                    <div id="planner-engine-wrapper" style="display:none;">
-                        <div class="planner-form glass-card engine-playground-card">
-                            <div class="engine-header">
-                                <div class="engine-badge"><i class="fas fa-terminal"></i> Section 9 Engine Spec</div>
-                                <span class="engine-hint">Structured JSON Input & Output</span>
-                            </div>
-                            <div class="engine-presets">
-                                <span class="presets-label">Presets:</span>
-                                <button type="button" class="preset-btn active" data-preset="jind-birthday">🎂 Jind Birthday (₹50k)</button>
-                                <button type="button" class="preset-btn" data-preset="delhi-wedding">💒 Delhi Wedding (₹5L)</button>
-                                <button type="button" class="preset-btn" data-preset="college-fest">🎓 College Fest (₹1L)</button>
-                                <button type="button" class="preset-btn" data-preset="corporate-event">🏢 Corporate Gala (₹2.5L)</button>
-                            </div>
-                            <div class="form-group">
-                                <div class="editor-header">
-                                    <label for="engine-json-input"><i class="fas fa-arrow-right-to-bracket"></i> Engine Input JSON (budgetPaise):</label>
-                                    <button type="button" class="btn btn-ghost btn-xs" id="format-engine-json"><i class="fas fa-align-left"></i> Format</button>
-                                </div>
-                                <textarea id="engine-json-input" class="code-editor" rows="10" spellcheck="false">{
-  "type": "birthday",
-  "city": "Jind",
-  "guests": 50,
-  "budgetPaise": 5000000,
-  "theme": "modern",
-  "durationHours": 4
-}</textarea>
-                            </div>
-                            <button type="button" class="btn btn-primary btn-lg btn-full" id="run-engine-btn">
-                                <i class="fas fa-bolt"></i> Run AI Planning Engine
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="planner-result-section" id="planner-result-section" style="display:none;">
                     <div class="plan-result-wrapper">
-                        <div class="result-view-tabs" id="result-view-tabs">
-                            <button class="result-tab-btn active" id="tab-view-visual"><i class="fas fa-chart-pie"></i> Visual Plan</button>
-                            <button class="result-tab-btn" id="tab-view-json"><i class="fas fa-code"></i> Expected JSON Output</button>
-                        </div>
+
                         <div class="plan-result glass-card" id="plan-result">
                             <!-- AI Plan results will be injected here -->
                         </div>
-                        <div class="plan-json-result glass-card" id="plan-json-result" style="display:none;">
-                            <div class="json-header">
-                                <span><i class="fas fa-check-circle text-success"></i> Engine Structured Output</span>
-                                <div class="json-actions">
-                                    <button class="btn btn-ghost btn-sm" id="copy-json-btn"><i class="fas fa-copy"></i> Copy JSON</button>
-                                    <button class="btn btn-outline btn-sm" id="download-json-btn"><i class="fas fa-download"></i> Download .json</button>
-                                    <button class="btn btn-primary btn-sm" id="apply-json-plan-btn"><i class="fas fa-gauge-high"></i> Apply to Dashboard</button>
-                                </div>
-                            </div>
-                            <pre class="json-code-block"><code id="raw-json-output"></code></pre>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -581,7 +522,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 3: AI BUDGET CALCULATOR ══════ -->
     <main class="app-page" id="page-budget-calculator">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -668,7 +609,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 4: VENDOR MARKETPLACE ══════ -->
     <main class="app-page" id="page-vendor-marketplace">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -738,7 +679,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 5: SMART INVITATIONS & RSVP ══════ -->
     <main class="app-page" id="page-invitations">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -883,7 +824,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 6: 3D VENUE PREVIEW ══════ -->
     <main class="app-page" id="page-venue-3d">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -980,7 +921,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 7: GUEST MANAGEMENT ══════ -->
     <main class="app-page" id="page-guest-management">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -1087,7 +1028,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 8: EXPENSE TRACKER ══════ -->
     <main class="app-page" id="page-expense-tracker">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -1197,7 +1138,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 9: LIVE EVENT DASHBOARD ══════ -->
     <main class="app-page" id="page-dashboard">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -1303,7 +1244,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 10: VENDOR PORTAL DASHBOARD ══════ -->
     <main class="app-page" id="page-vendor-dashboard">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -1380,7 +1321,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- ══════ PAGE 11: AI THEME GENERATOR ══════ -->
     <main class="app-page" id="page-theme-generator">
-        
+
     <!-- Top Breadcrumb Navigation Bar -->
     <div class="page-breadcrumb-bar">
         <div class="container breadcrumb-inner">
@@ -1449,7 +1390,6 @@
                         <div class="logo-icon"><i class="fas fa-sparkles"></i></div>
                         <span class="logo-text">Celebri<span class="logo-accent">Plan</span></span>
                     </a>
-                    <p>The AI-powered celebration & event planning platform that makes every occasion unforgettable.</p>
                     <div class="footer-socials">
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -1671,455 +1611,6 @@
         </div>
     </div>
 
-    <!-- Full-Stack Startup Architecture & ER Diagram Modal -->
-    <div class="modal-overlay" id="blueprint-modal">
-        <div class="modal-content glass-card modal-xl">
-            <button class="modal-close" id="blueprint-modal-close"><i class="fas fa-times"></i></button>
-            <div class="blueprint-modal-header">
-                <span class="section-badge"><i class="fas fa-rocket"></i> Startup Architecture Blueprint</span>
-                <h2>Celebration & Event Planner — Full-Stack Blueprint</h2>
-                <p>Next.js 14 App Router + Node.js Engine + PostgreSQL Prisma ORM + AI Planning + Vendor Marketplace + 3D View</p>
-            </div>
-            <div class="blueprint-tabs">
-                <button class="bp-tab active" data-bptab="er-diagram"><i class="fas fa-sitemap"></i> Entity Relationship Diagram</button>
-                <button class="bp-tab" data-bptab="tech-stack"><i class="fas fa-layer-group"></i> Tech Stack Architecture</button>
-                <button class="bp-tab" data-bptab="prisma-schema"><i class="fas fa-database"></i> Prisma ORM Schema</button>
-                <button class="bp-tab" data-bptab="api-docs"><i class="fas fa-network-wired"></i> REST & AI API Endpoints</button>
-            </div>
-            <div class="blueprint-content-area">
-                <!-- Tab 1: ER Diagram -->
-                <div class="bp-tab-panel active" id="panel-er-diagram">
-                    <div class="er-diagram-viewer">
-                        <div class="er-diagram-legend">
-                            <span class="legend-chip user-chip">● Core User & Roles</span>
-                            <span class="legend-chip event-chip">● Event & Planning</span>
-                            <span class="legend-chip guest-chip">● Guests & Invitations</span>
-                            <span class="legend-chip vendor-chip">● Vendors, Bookings & Payments</span>
-                        </div>
-                        <div class="er-diagram-grid">
-                            <!-- User Entity -->
-                            <div class="er-node user-node">
-                                <div class="node-header"><i class="fas fa-user"></i> USER</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field"><span>email</span><small>String</small></div>
-                                    <div class="field"><span>name</span><small>String</small></div>
-                                    <div class="field"><span>phone</span><small>String</small></div>
-                                    <div class="field"><span>role</span><small>UserRole</small></div>
-                                </div>
-                                <div class="node-relations">has Role • organizes Event • owns Vendor</div>
-                            </div>
-
-                            <!-- User Role -->
-                            <div class="er-node role-node">
-                                <div class="node-header"><i class="fas fa-id-badge"></i> USER_ROLE</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field"><span>roleName</span><small>ORGANIZER | VENDOR | GUEST | ADMIN</small></div>
-                                    <div class="field"><span>permissions</span><small>String[]</small></div>
-                                </div>
-                                <div class="node-relations">belongs to User</div>
-                            </div>
-
-                            <!-- Event Entity -->
-                            <div class="er-node event-node">
-                                <div class="node-header"><i class="fas fa-calendar-star"></i> EVENT</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>👤 userId</span><small>UUID</small></div>
-                                    <div class="field"><span>type</span><small>EventType</small></div>
-                                    <div class="field"><span>city</span><small>String</small></div>
-                                    <div class="field"><span>budgetPaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>guestCount</span><small>Int</small></div>
-                                    <div class="field"><span>theme</span><small>String</small></div>
-                                </div>
-                                <div class="node-relations">sends Invitation • has Tasks • manages Budget • requests Services</div>
-                            </div>
-
-                            <!-- Invitation Entity -->
-                            <div class="er-node inv-node">
-                                <div class="node-header"><i class="fas fa-envelope-open-text"></i> INVITATION</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field"><span>qrCode</span><small>String</small></div>
-                                    <div class="field"><span>template</span><small>String</small></div>
-                                    <div class="field"><span>shareLink</span><small>String</small></div>
-                                </div>
-                                <div class="node-relations">informs Guest</div>
-                            </div>
-
-                            <!-- Guest Entity -->
-                            <div class="er-node guest-node">
-                                <div class="node-header"><i class="fas fa-user-check"></i> GUEST</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>✉️ invitationId</span><small>UUID</small></div>
-                                    <div class="field"><span>name</span><small>String</small></div>
-                                    <div class="field"><span>rsvpStatus</span><small>ACCEPTED | DECLINED | PENDING</small></div>
-                                    <div class="field"><span>tableNumber</span><small>Int?</small></div>
-                                    <div class="field"><span>checkedIn</span><small>Boolean</small></div>
-                                </div>
-                                <div class="node-relations">receives Invitation • check-in at Event</div>
-                            </div>
-
-                            <!-- Task Entity -->
-                            <div class="er-node task-node">
-                                <div class="node-header"><i class="fas fa-list-check"></i> TASK_LIST</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field"><span>title</span><small>String</small></div>
-                                    <div class="field"><span>priority</span><small>HIGH | MEDIUM | LOW</small></div>
-                                    <div class="field"><span>completed</span><small>Boolean</small></div>
-                                    <div class="field"><span>gcalEventId</span><small>String?</small></div>
-                                </div>
-                                <div class="node-relations">belongs to Event • syncs with Google Calendar</div>
-                            </div>
-
-                            <!-- Budget / Expense Entity -->
-                            <div class="er-node budget-node">
-                                <div class="node-header"><i class="fas fa-wallet"></i> BUDGET / EXPENSE</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field"><span>category</span><small>VENUE | FOOD | DECOR | PHOTO | OTHER</small></div>
-                                    <div class="field"><span>allocatedPaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>spentPaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>dueStatus</span><small>PAID | PENDING | PARTIAL</small></div>
-                                </div>
-                                <div class="node-relations">tracks Event Financials</div>
-                            </div>
-
-                            <!-- Album Entity -->
-                            <div class="er-node album-node">
-                                <div class="node-header"><i class="fas fa-images"></i> ALBUM</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field"><span>mediaUrls</span><small>String[]</small></div>
-                                    <div class="field"><span>photographerId</span><small>UUID?</small></div>
-                                </div>
-                                <div class="node-relations">stores Event Memories</div>
-                            </div>
-
-                            <!-- Event Checklist Entity -->
-                            <div class="er-node check-node">
-                                <div class="node-header"><i class="fas fa-calendar-check"></i> EVENT_CHECKLIST</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field"><span>scheduleTimeline</span><small>JSON</small></div>
-                                    <div class="field"><span>status</span><small>ACTIVE | COMPLETED</small></div>
-                                </div>
-                                <div class="node-relations">organizes Day-of Schedule</div>
-                            </div>
-
-                            <!-- Vendor Entity -->
-                            <div class="er-node vendor-node">
-                                <div class="node-header"><i class="fas fa-store"></i> VENDOR</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>👤 ownerId</span><small>UUID</small></div>
-                                    <div class="field"><span>businessName</span><small>String</small></div>
-                                    <div class="field"><span>category</span><small>VENUE | CATERER | DECORATOR | DJ | PHOTO</small></div>
-                                    <div class="field"><span>city</span><small>String</small></div>
-                                    <div class="field"><span>rating</span><small>Float</small></div>
-                                </div>
-                                <div class="node-relations">offers Services • receives Requests • manages Bookings</div>
-                            </div>
-
-                            <!-- Service Entity -->
-                            <div class="er-node service-node">
-                                <div class="node-header"><i class="fas fa-concierge-bell"></i> SERVICE</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🏪 vendorId</span><small>UUID</small></div>
-                                    <div class="field"><span>title</span><small>String</small></div>
-                                    <div class="field"><span>basePricePaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>capacity</span><small>Int</small></div>
-                                </div>
-                                <div class="node-relations">belongs to Vendor</div>
-                            </div>
-
-                            <!-- Service Request -->
-                            <div class="er-node request-node">
-                                <div class="node-header"><i class="fas fa-file-invoice"></i> SERVICE_REQUEST</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🎉 eventId</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🏪 vendorId</span><small>UUID</small></div>
-                                    <div class="field"><span>requirements</span><small>String</small></div>
-                                    <div class="field"><span>dateRequested</span><small>DateTime</small></div>
-                                </div>
-                                <div class="node-relations">produces Quote</div>
-                            </div>
-
-                            <!-- Quote Entity -->
-                            <div class="er-node quote-node">
-                                <div class="node-header"><i class="fas fa-file-lines"></i> QUOTE</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>📄 requestId</span><small>UUID</small></div>
-                                    <div class="field"><span>quotedPricePaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>terms</span><small>String</small></div>
-                                    <div class="field"><span>accepted</span><small>Boolean</small></div>
-                                </div>
-                                <div class="node-relations">confirms Booking</div>
-                            </div>
-
-                            <!-- Booking Entity -->
-                            <div class="er-node booking-node">
-                                <div class="node-header"><i class="fas fa-handshake"></i> BOOKING</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>📑 quoteId</span><small>UUID</small></div>
-                                    <div class="field"><span>status</span><small>CONFIRMED | CANCELLED</small></div>
-                                    <div class="field"><span>scheduledDate</span><small>DateTime</small></div>
-                                </div>
-                                <div class="node-relations">generates Payment • receives Review</div>
-                            </div>
-
-                            <!-- Payment Entity -->
-                            <div class="er-node payment-node">
-                                <div class="node-header"><i class="fas fa-credit-card"></i> PAYMENT</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🤝 bookingId</span><small>UUID</small></div>
-                                    <div class="field"><span>amountPaise</span><small>BigInt</small></div>
-                                    <div class="field"><span>gatewayRef</span><small>String</small></div>
-                                    <div class="field"><span>status</span><small>SUCCESS | PENDING</small></div>
-                                </div>
-                                <div class="node-relations">settles Booking</div>
-                            </div>
-
-                            <!-- Review Entity -->
-                            <div class="er-node review-node">
-                                <div class="node-header"><i class="fas fa-star"></i> REVIEW</div>
-                                <div class="node-fields">
-                                    <div class="field pk"><span>🔑 id</span><small>UUID</small></div>
-                                    <div class="field fk"><span>🤝 bookingId</span><small>UUID</small></div>
-                                    <div class="field"><span>rating</span><small>1 to 5</small></div>
-                                    <div class="field"><span>comment</span><small>String</small></div>
-                                </div>
-                                <div class="node-relations">rates Vendor Service</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab 2: Tech Stack -->
-                <div class="bp-tab-panel" id="panel-tech-stack" style="display:none;">
-                    <div class="tech-stack-overview">
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fab fa-react text-info"></i></div>
-                            <h4>Next.js 14 App Router</h4>
-                            <p>Server-side rendering, React Server Components, responsive Tailwind / styled UI, and SEO-optimized event landing pages.</p>
-                        </div>
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fab fa-node-js text-success"></i></div>
-                            <h4>Node.js / Express API</h4>
-                            <p>Event orchestration engine, payment webhooks, Google Calendar OAuth2 integration, and WhatsApp Cloud API messaging.</p>
-                        </div>
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fas fa-robot text-primary"></i></div>
-                            <h4>AI Planning Engine (Section 9)</h4>
-                            <p>Structured JSON planner generating exact per-category budget splits, step-by-step task lists, and timed schedules.</p>
-                        </div>
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fas fa-cube text-warning"></i></div>
-                            <h4>Three.js / HTML5 3D Preview</h4>
-                            <p>Interactive 3D venue setup viewer with dynamic stage lighting, custom table configurations, and floor plan customization.</p>
-                        </div>
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fas fa-database text-info"></i></div>
-                            <h4>PostgreSQL + Prisma ORM</h4>
-                            <p>ACID-compliant relational database modeling Users, Events, Vendors, Quotes, Bookings, Payments, and Guest RSVPs.</p>
-                        </div>
-                        <div class="stack-card">
-                            <div class="stack-icon"><i class="fas fa-bolt text-danger"></i></div>
-                            <h4>Socket.io / Redis</h4>
-                            <p>Real-time live organizer dashboard, instant RSVP tracking, QR check-in notifications, and vendor messaging.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab 3: Prisma Schema -->
-                <div class="bp-tab-panel" id="panel-prisma-schema" style="display:none;">
-                    <div class="schema-code-wrapper">
-                        <div class="schema-header">
-                            <span>prisma/schema.prisma (Production PostgreSQL Schema)</span>
-                            <button class="btn btn-ghost btn-xs" id="copy-prisma-btn"><i class="fas fa-copy"></i> Copy Schema</button>
-                        </div>
-                        <pre class="schema-code"><code>// Prisma Schema for CelebriPlan Event Platform
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum Role {
-  ORGANIZER
-  VENDOR
-  GUEST
-  ADMIN
-}
-
-enum RSVPStatus {
-  ACCEPTED
-  DECLINED
-  PENDING
-}
-
-enum BookingStatus {
-  REQUESTED
-  QUOTED
-  CONFIRMED
-  CANCELLED
-}
-
-model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  name      String
-  phone     String?
-  role      Role      @default(ORGANIZER)
-  events    Event[]   @relation("OrganizerEvents")
-  vendor    Vendor?   @relation("VendorOwner")
-  createdAt DateTime  @default(now())
-}
-
-model Event {
-  id           String        @id @default(uuid())
-  title        String
-  type         String        // birthday, wedding, college-fest, corporate
-  city         String
-  budgetPaise  BigInt
-  guestCount   Int
-  theme        String
-  durationHour Int           @default(4)
-  organizerId  String
-  organizer    User          @relation("OrganizerEvents", fields: [organizerId], references: [id])
-  invitation   Invitation?
-  tasks        Task[]
-  expenses     Expense[]
-  bookings     Booking[]
-  createdAt    DateTime      @default(now())
-}
-
-model Invitation {
-  id        String   @id @default(uuid())
-  eventId   String   @unique
-  event     Event    @relation(fields: [eventId], references: [id])
-  qrCodeUrl String
-  template  String   @default("elegant")
-  guests    Guest[]
-}
-
-model Guest {
-  id           String     @id @default(uuid())
-  invitationId String
-  invitation   Invitation @relation(fields: [invitationId], references: [id])
-  name         String
-  phone        String?
-  email        String?
-  rsvpStatus   RSVPStatus @default(PENDING)
-  tableNumber  Int?
-  checkedIn    Boolean    @default(false)
-}
-
-model Task {
-  id          String   @id @default(uuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id])
-  title       String
-  priority    String   @default("medium")
-  completed   Boolean  @default(false)
-  dueDate     DateTime?
-  gcalEventId String?
-}
-
-model Expense {
-  id          String   @id @default(uuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id])
-  category    String   // venue, food, decoration, photography, other
-  description String
-  amountPaise BigInt
-  status      String   @default("paid")
-}
-
-model Vendor {
-  id          String     @id @default(uuid())
-  ownerId     String     @unique
-  owner       User       @relation("VendorOwner", fields: [ownerId], references: [id])
-  name        String
-  category    String     // venue, decorator, photographer, caterer, dj
-  city        String
-  rating      Float      @default(5.0)
-  services    Service[]
-  bookings    Booking[]
-}
-
-model Service {
-  id             String  @id @default(uuid())
-  vendorId       String
-  vendor         Vendor  @relation(fields: [vendorId], references: [id])
-  name           String
-  basePricePaise BigInt
-  capacity       Int?
-}
-
-model Booking {
-  id          String        @id @default(uuid())
-  eventId     String
-  event       Event         @relation(fields: [eventId], references: [id])
-  vendorId    String
-  vendor      Vendor        @relation(fields: [vendorId], references: [id])
-  status      BookingStatus @default(CONFIRMED)
-  totalPaise  BigInt
-  advancePaid BigInt        @default(0)
-  createdAt   DateTime      @default(now())
-}</code></pre>
-                    </div>
-                </div>
-
-                <!-- Tab 4: API Docs -->
-                <div class="bp-tab-panel" id="panel-api-docs" style="display:none;">
-                    <div class="api-docs-list">
-                        <div class="api-doc-item">
-                            <span class="api-method post">POST</span>
-                            <span class="api-path">/api/ai/plan</span>
-                            <p>Executes Section 9 AI Event Planning Engine. Accepts <code>{ type, city, guests, budgetPaise, theme, durationHours }</code> and returns clean structured output with title, budget breakdown, tasks & timeline.</p>
-                        </div>
-                        <div class="api-doc-item">
-                            <span class="api-method get">GET</span>
-                            <span class="api-path">/api/vendors?category=&city=</span>
-                            <p>Returns verified marketplace vendors filtered by category (venue, caterer, decorator, photographer, dj) and city.</p>
-                        </div>
-                        <div class="api-doc-item">
-                            <span class="api-method post">POST</span>
-                            <span class="api-path">/api/vendors/compare</span>
-                            <p>Side-by-side comparative analysis of selected vendor IDs across capacity, pricing, ratings, and inclusions.</p>
-                        </div>
-                        <div class="api-doc-item">
-                            <span class="api-method post">POST</span>
-                            <span class="api-path">/api/guests/rsvp</span>
-                            <p>Records guest RSVP status, generates unique QR entry pass code, and updates real-time attendance tracking.</p>
-                        </div>
-                        <div class="api-doc-item">
-                            <span class="api-method get">GET</span>
-                            <span class="api-path">/api/calendar/export</span>
-                            <p>Generates compliant iCalendar (.ICS) file containing all event milestones and synchronized tasks for Google Calendar & Apple Calendar.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="modal-overlay" id="task-modal">
         <div class="modal-content glass-card modal-sm">

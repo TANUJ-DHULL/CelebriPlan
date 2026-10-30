@@ -12,7 +12,7 @@ const AppState = {
     selectedVendorsForCompare: [],
     chatHistory: [],
     currentPlan: null,
-    currentPlanJson: null,
+    dashboardPlan: null,
     eventDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
 };
 
@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroParticles();
     initCounters();
     initAIPlannerForm();
-    initSection9EnginePlayground();
     initBudgetCalculator();
     initVendorMarketplace();
     initVendorComparison();
@@ -41,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initSmoothScroll();
     initScrollAnimations();
-    initBlueprintModal();
     // Run initial budget calculation
     calculateBudget();
 });
@@ -458,7 +456,7 @@ const AIPlanner = {
         return str.replace(/\b\w/g, l => l.toUpperCase());
     },
 
-    runSection9Engine(input) {
+    buildDashboardPlan(input) {
         const type = (input.type || 'birthday').toLowerCase();
         const city = input.city || 'Jind';
         const guests = parseInt(input.guests, 10) || 50;
@@ -624,8 +622,8 @@ function renderPlanResult(plan, container) {
         photography: '#3b82f6', entertainment: '#10b981', other: '#6366f1'
     };
 
-    // Generate exact Section 9 Engine structured JSON
-    const s9Output = AIPlanner.runSection9Engine({
+    // Prepare the plan used by dashboard tasks and expenses
+    const dashboardPlan = AIPlanner.buildDashboardPlan({
         type: plan.rawType || 'birthday',
         city: plan.city || 'Jind',
         guests: plan.guests || 50,
@@ -633,12 +631,7 @@ function renderPlanResult(plan, container) {
         theme: plan.rawTheme || 'modern',
         durationHours: plan.duration || 4
     });
-    AppState.currentPlanJson = s9Output;
-    const jsonOutputEl = document.getElementById('raw-json-output');
-    if (jsonOutputEl) {
-        jsonOutputEl.textContent = JSON.stringify(s9Output, null, 2);
-    }
-
+    AppState.dashboardPlan = dashboardPlan;
     container.innerHTML = `
         <div class="plan-result-header">
             <div class="plan-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
@@ -714,48 +707,19 @@ function renderPlanResult(plan, container) {
 
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:var(--space-xl);">
             <button class="btn btn-primary" onclick="applyPlanToLiveDashboard()"><i class="fas fa-gauge-high"></i> Apply to Dashboard</button>
-            <button class="btn btn-outline" onclick="switchToJSONView()"><i class="fas fa-code"></i> View Raw JSON (Section 9)</button>
             <button class="btn btn-outline" onclick="exportPlan()"><i class="fas fa-download"></i> Export PDF</button>
             <button class="btn btn-outline" onclick="sharePlan()"><i class="fas fa-share-nodes"></i> Share Plan</button>
         </div>
     `;
 }
 
-function switchToJSONView() {
-    const visualTab = document.getElementById('tab-view-visual');
-    const jsonTab = document.getElementById('tab-view-json');
-    const visualResult = document.getElementById('plan-result');
-    const jsonResult = document.getElementById('plan-json-result');
-
-    if (visualTab && jsonTab && visualResult && jsonResult) {
-        visualTab.classList.remove('active');
-        jsonTab.classList.add('active');
-        visualResult.style.display = 'none';
-        jsonResult.style.display = 'block';
-    }
-}
-
-function switchToVisualView() {
-    const visualTab = document.getElementById('tab-view-visual');
-    const jsonTab = document.getElementById('tab-view-json');
-    const visualResult = document.getElementById('plan-result');
-    const jsonResult = document.getElementById('plan-json-result');
-
-    if (visualTab && jsonTab && visualResult && jsonResult) {
-        jsonTab.classList.remove('active');
-        visualTab.classList.add('active');
-        jsonResult.style.display = 'none';
-        visualResult.style.display = 'block';
-    }
-}
-
 function applyPlanToLiveDashboard() {
-    if (!AppState.currentPlanJson) {
+    if (!AppState.dashboardPlan) {
         showToast('No active plan to apply', 'error');
         return;
     }
 
-    const { title, tasks, budget } = AppState.currentPlanJson;
+    const { title, tasks, budget } = AppState.dashboardPlan;
 
     // Apply tasks to dashboard
     if (tasks && tasks.length > 0) {
@@ -795,195 +759,6 @@ function applyPlanToLiveDashboard() {
 }
 
 // ═══════════════════════════════════════════
-// SECTION 9 AI ENGINE JSON PLAYGROUND
-// ═══════════════════════════════════════════
-function initSection9EnginePlayground() {
-    const tabForm = document.getElementById('tab-btn-form');
-    const tabEngine = document.getElementById('tab-btn-engine');
-    const formWrapper = document.getElementById('planner-form-wrapper');
-    const engineWrapper = document.getElementById('planner-engine-wrapper');
-    const jsonInput = document.getElementById('engine-json-input');
-    const runBtn = document.getElementById('run-engine-btn');
-    const formatBtn = document.getElementById('format-engine-json');
-    const resultSection = document.getElementById('planner-result-section');
-    const resultContainer = document.getElementById('plan-result');
-    const visualViewTab = document.getElementById('tab-view-visual');
-    const jsonViewTab = document.getElementById('tab-view-json');
-    const copyJsonBtn = document.getElementById('copy-json-btn');
-    const downloadJsonBtn = document.getElementById('download-json-btn');
-    const applyJsonPlanBtn = document.getElementById('apply-json-plan-btn');
-
-    // Tab switching between Form and Engine
-    if (tabForm && tabEngine) {
-        tabForm.addEventListener('click', () => {
-            tabEngine.classList.remove('active');
-            tabForm.classList.add('active');
-            engineWrapper.style.display = 'none';
-            formWrapper.style.display = 'block';
-        });
-
-        tabEngine.addEventListener('click', () => {
-            tabForm.classList.remove('active');
-            tabEngine.classList.add('active');
-            formWrapper.style.display = 'none';
-            engineWrapper.style.display = 'block';
-        });
-    }
-
-    // Result view tabs (Visual vs JSON)
-    if (visualViewTab && jsonViewTab) {
-        visualViewTab.addEventListener('click', switchToVisualView);
-        jsonViewTab.addEventListener('click', switchToJSONView);
-    }
-
-    // Presets
-    const presets = {
-        'jind-birthday': {
-            type: "birthday",
-            city: "Jind",
-            guests: 50,
-            budgetPaise: 5000000,
-            theme: "modern",
-            durationHours: 4
-        },
-        'delhi-wedding': {
-            type: "wedding",
-            city: "Delhi",
-            guests: 200,
-            budgetPaise: 50000000,
-            theme: "modern",
-            durationHours: 6
-        },
-        'college-fest': {
-            type: "college-fest",
-            city: "Chandigarh",
-            guests: 500,
-            budgetPaise: 10000000,
-            theme: "modern",
-            durationHours: 8
-        },
-        'corporate-event': {
-            type: "corporate",
-            city: "Gurgaon",
-            guests: 120,
-            budgetPaise: 25000000,
-            theme: "modern",
-            durationHours: 6
-        }
-    };
-
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const p = presets[btn.dataset.preset];
-            if (p && jsonInput) {
-                jsonInput.value = JSON.stringify(p, null, 2);
-                showToast(`Loaded ${btn.textContent.trim()} preset`, 'info');
-            }
-        });
-    });
-
-    // Format JSON button
-    if (formatBtn && jsonInput) {
-        formatBtn.addEventListener('click', () => {
-            try {
-                const parsed = JSON.parse(jsonInput.value);
-                jsonInput.value = JSON.stringify(parsed, null, 2);
-                showToast('JSON formatted', 'info');
-            } catch (err) {
-                showToast('Invalid JSON syntax: ' + err.message, 'error');
-            }
-        });
-    }
-
-    // Run Engine Button
-    if (runBtn && jsonInput) {
-        runBtn.addEventListener('click', async () => {
-            let inputObj;
-            try {
-                inputObj = JSON.parse(jsonInput.value);
-            } catch (err) {
-                showToast('Invalid JSON in editor: ' + err.message, 'error');
-                return;
-            }
-
-            // Show loading
-            resultSection.style.display = 'block';
-            switchToJSONView();
-            resultContainer.innerHTML = `
-                <div class="plan-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Executing Section 9 AI Planning Engine...</p>
-                </div>
-            `;
-            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            await delay(1200);
-
-            // Execute engine
-            const engineOutput = AIPlanner.runSection9Engine(inputObj);
-            AppState.currentPlanJson = engineOutput;
-
-            // Update JSON block
-            const jsonCodeEl = document.getElementById('raw-json-output');
-            if (jsonCodeEl) jsonCodeEl.textContent = JSON.stringify(engineOutput, null, 2);
-
-            // Generate full plan object for visual view
-            const budgetInRupees = inputObj.budgetPaise ? Math.round(inputObj.budgetPaise / 100) : (inputObj.budget || 50000);
-            const fullPlan = AIPlanner.generatePlan({
-                type: inputObj.type || 'birthday',
-                city: inputObj.city || 'Jind',
-                guests: inputObj.guests || 50,
-                budget: budgetInRupees,
-                duration: inputObj.durationHours || 4,
-                theme: inputObj.theme || 'modern',
-                food: 'both',
-                notes: ''
-            });
-            fullPlan.rawType = inputObj.type;
-            fullPlan.rawTheme = inputObj.theme;
-            fullPlan.title = engineOutput.title;
-            fullPlan.budget = engineOutput.budget;
-            fullPlan.tasks = engineOutput.tasks.map(t => ({ task: t, priority: 'high' }));
-            fullPlan.timeline = engineOutput.timeline;
-
-            renderPlanResult(fullPlan, resultContainer);
-            switchToJSONView();
-            showToast('Section 9 AI Engine produced structured plan! ⚡', 'success');
-        });
-    }
-
-    // Copy JSON
-    if (copyJsonBtn) {
-        copyJsonBtn.addEventListener('click', () => {
-            const code = document.getElementById('raw-json-output').textContent;
-            navigator.clipboard.writeText(code);
-            showToast('Structured JSON copied to clipboard! 📋', 'success');
-        });
-    }
-
-    // Download JSON
-    if (downloadJsonBtn) {
-        downloadJsonBtn.addEventListener('click', () => {
-            const code = document.getElementById('raw-json-output').textContent;
-            const blob = new Blob([code], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'celebriplan-ai-plan.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast('Saved celebriplan-ai-plan.json! 📥', 'success');
-        });
-    }
-
-    // Apply JSON Plan button
-    if (applyJsonPlanBtn) {
-        applyJsonPlanBtn.addEventListener('click', applyPlanToLiveDashboard);
-    }
-}
-
 function exportPlan() {
     showToast('Plan exported as PDF! 📄', 'success');
 }
@@ -3113,54 +2888,6 @@ function downloadICSFile() {
 }
 
 // ═══════════════════════════════════════════
-// STARTUP BLUEPRINT & ER DIAGRAM MODAL
-// ═══════════════════════════════════════════
-function initBlueprintModal() {
-    const modal = document.getElementById('blueprint-modal');
-    const openBtns = document.querySelectorAll('.nav-blueprint-btn');
-    const closeBtn = document.getElementById('blueprint-modal-close');
-
-    if (modal) {
-        openBtns.forEach(openBtn => {
-            openBtn.addEventListener('click', () => {
-                modal.classList.add('active');
-            });
-        });
-    }
-
-    if (closeBtn && modal) {
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-    }
-
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.remove('active');
-        });
-    }
-
-    // Blueprint Tab switcher
-    document.querySelectorAll('.bp-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.bp-tab-panel').forEach(p => p.style.display = 'none');
-            tab.classList.add('active');
-            const targetPanel = document.getElementById(`panel-${tab.dataset.bptab}`);
-            if (targetPanel) targetPanel.style.display = 'block';
-        });
-    });
-
-    const copyPrismaBtn = document.getElementById('copy-prisma-btn');
-    if (copyPrismaBtn) {
-        copyPrismaBtn.addEventListener('click', () => {
-            const code = document.querySelector('.schema-code code').textContent;
-            navigator.clipboard.writeText(code);
-            showToast('Prisma schema copied to clipboard! 📋', 'success');
-        });
-    }
-}
-
 // Keyboard shortcut for modals and chatbot
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
